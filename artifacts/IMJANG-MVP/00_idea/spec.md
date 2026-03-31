@@ -434,7 +434,9 @@ Future<List<RealPriceItem>> realPrices(... , {required String regionCode, requir
 | `sharedWith` | `array<string>` | O | 공유 참여자 UID 배열 (쿼리 필터용, 기본: [ownerId]) |
 | `lastInspectionAt` | `timestamp?` | X | 마지막 임장 기록일시 |
 | `inspectionCount` | `number` | O | 임장 기록 수 (기본: 0) |
-| `averageRating` | `number?` | X | 평균 종합 평점 |
+| `recentTradePrice` | `number?` | X | 최근 실거래가 (만원 단위, 필터/정렬용 — 실거래가 조회 시 자동 갱신) |
+| `representativeArea` | `number?` | X | 대표 전용면적 (㎡, 최다 거래 면적 — 실거래가 조회 시 자동 갱신) |
+| `averageRating` | `number?` | X | 평균 종합 평점 (필터/정렬용 — 임장 기록 CUD 시 자동 갱신) |
 | `createdAt` | `timestamp` | O | 등록일시 |
 | `updatedAt` | `timestamp` | O | 수정일시 |
 

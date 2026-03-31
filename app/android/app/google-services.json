@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "167587122876",
+    "project_id": "imjang-1c9df",
+    "storage_bucket": "imjang-1c9df.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:167587122876:android:8865442c1708f10a070ab9",
+        "android_client_info": {
+          "package_name": "com.imjang.imjang_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4m-ZXgmOrjCV5J4GzoOW17P8jk2uuuH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

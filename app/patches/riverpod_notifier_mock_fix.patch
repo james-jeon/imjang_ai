@@ -1,0 +1,25 @@
+--- a/lib/src/notifier/base.dart
++++ b/lib/src/notifier/base.dart
+@@ -200,7 +200,14 @@ class NotifierProviderElement<NotifierT extends NotifierBase<T>, T>
+     final provider = this.provider as NotifierProviderBase<NotifierT, T>;
+
+     final notifierResult = _notifierNotifier.result ??= Result.guard(() {
+-      return provider._createNotifier().._setElement(this);
++      final notifier = provider._createNotifier();
++      try {
++        notifier._setElement(this);
++      } on NoSuchMethodError {
++        // Allow mock notifiers that don't have _setElement
++        // (mockito generates `implements` not `extends`, so private methods are missing)
++      }
++      return notifier;
+     });
+
+     // If the Notifier failed to create (such as if the constructor has an assert exception),
+
+USAGE:
+  Apply after `flutter pub get`:
+    patch -p1 -d ~/.pub-cache/hosted/pub.dev/riverpod-2.6.1/ < patches/riverpod_notifier_mock_fix.patch
+
+  Or run the apply script:
+    dart run tool/apply_patches.dart
