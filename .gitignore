@@ -1,3 +1,6 @@
 .claude/settings.json
 .env
 app/.env
+app/lib/firebase_options.dart
+app/android/app/google-services.json
+app/ios/Runner/GoogleService-Info.plist
