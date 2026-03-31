@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>임장노트 - Interactive Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #2563EB;
+  --primary-light: #3B82F6;
+  --primary-dark: #1D4ED8;
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --border: #E2E8F0;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --interested: #FFC107;
+  --planned: #2196F3;
+  --visited: #4CAF50;
+  --revisit: #FF9800;
+  --excluded: #9E9E9E;
+  --phone-w: 280px;
+  --phone-h: 606px;
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #0F172A;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+/* Layout */
+.layout {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+/* Side Panel */
+.side-panel {
+  width: 240px;
+  background: #1E293B;
+  border-radius: 16px;
+  padding: 24px 20px;
+  color: #CBD5E1;
+  font-size: 11px;
+  max-height: var(--phone-h);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.side-panel h2 {
+  color: #F1F5F9;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.side-panel .subtitle {
+  color: var(--primary-light);
+  font-size: 10px;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.side-panel h3 {
+  color: #94A3B8;
+  font-size: 10px;
+  font-weight: 600;
+  margin: 14px 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.nav-link {
+  display: block;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  font-size: 11px;
+  color: #94A3B8;
+}
+.nav-link:hover { background: #334155; color: #E2E8F0; }
+.nav-link.active { background: var(--primary); color: #fff; font-weight: 500; }
+.side-panel .current-screen {
+  background: #334155;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 12px 0;
+  text-align: center;
+}
+.side-panel .current-screen .label { font-size: 9px; color: #64748B; }
+.side-panel .current-screen .name { color: var(--primary-light); font-weight: 600; font-size: 13px; margin-top: 2px; }
+.side-panel .instructions {
+  margin-top: 16px;
+  padding: 10px;
+  background: rgba(37,99,235,0.1);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+  color: #94A3B8;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Phone Frame */
+.phone-frame {
+  width: var(--phone-w);
+  height: var(--phone-h);
+  border-radius: 40px;
+  border: 5px solid #1c1c1e;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* Dynamic Island */
+.dynamic-island {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 24px;
+  background: #1c1c1e;
+  border-radius: 14px;
+  z-index: 1000;
+}
+
+/* Status Bar */
+.status-bar {
+  height: 38px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 20px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  position: relative;
+  z-index: 10;
+}
+.status-bar .time { font-weight: 700; }
+.status-bar .icons { display: flex; gap: 4px; align-items: center; font-size: 9px; }
+
+/* Screens */
+.screen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: none;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  background: var(--bg);
+  overflow: hidden;
+}
+.screen.active {
+  display: flex;
+  opacity: 1;
+  transform: translateX(0);
+}
+.screen.slide-in-right {
+  display: flex;
+  animation: slideInRight 0.25s ease forwards;
+}
+.screen.slide-out-left {
+  display: flex;
+  animation: slideOutLeft 0.25s ease forwards;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0.5; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOutLeft {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-30%); opacity: 0; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Scrollable content */
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-content::-webkit-scrollbar { display: none; }
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.header .back-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; color: var(--primary);
+  border: none; background: none; border-radius: 50%;
+}
+.header .back-btn:active { background: var(--border); }
+.header .title {
+  flex: 1; text-align: center;
+  font-size: 14px; font-weight: 600;
+  margin: 0 -28px;
+  pointer-events: none;
+}
+.header .action-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; color: var(--primary);
+  border: none; background: none; border-radius: 50%;
+}
+.header .action-btn:active { background: var(--border); }
+
+/* Bottom Tabs */
+.bottom-tabs {
+  display: flex;
+  height: 50px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  padding-bottom: 6px;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 9px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  transition: color 0.15s;
+}
+.tab-item .tab-icon { font-size: 18px; }
+.tab-item.active { color: var(--primary); }
+.tab-item:active { opacity: 0.7; }
+
+/* Chips */
+.chip-row {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.chip {
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.chip.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.chip:active { transform: scale(0.95); }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border-radius: 12px;
+  margin: 0 14px 10px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: transform 0.1s;
+  border: 1px solid var(--border);
+}
+.card:active { transform: scale(0.98); }
+.card .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.card .card-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.card .card-subtitle { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+.card .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+
+/* Status Badge */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+}
+.badge.interested { background: var(--interested); color: #795600; }
+.badge.planned { background: var(--planned); }
+.badge.visited { background: var(--visited); }
+.badge.revisit { background: var(--revisit); }
+.badge.excluded { background: var(--excluded); }
+
+/* Stars */
+.stars { display: flex; gap: 2px; }
+.star {
+  font-size: 14px;
+  cursor: pointer;
+  color: #E2E8F0;
+  transition: color 0.1s;
+  user-select: none;
+}
+.star.filled { color: #FBBF24; }
+.star.display-only { cursor: default; }
+
+/* FAB */
+.fab {
+  position: absolute;
+  bottom: 60px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s;
+  z-index: 50;
+}
+.fab:active { transform: scale(0.9); }
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:active { background: var(--primary-dark); }
+.btn-secondary { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
+.btn-secondary:active { background: var(--bg); }
+.btn-danger { background: #EF4444; color: #fff; }
+.btn-danger:active { background: #DC2626; }
+
+/* Input */
+.input-group { margin-bottom: 12px; }
+.input-group label { display: block; font-size: 11px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+.input-field {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input-field:focus { border-color: var(--primary); }
+.input-field::placeholder { color: #CBD5E1; }
+
+/* Textarea */
+textarea.input-field {
+  resize: none;
+  min-height: 60px;
+}
+
+/* Toast */
+.toast {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1E293B;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Confirm Dialog */
+.dialog-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  padding: 30px;
+}
+.dialog-overlay.show { display: flex; }
+.dialog {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 20px;
+  width: 100%;
+  text-align: center;
+}
+.dialog .dialog-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.dialog .dialog-msg { font-size: 11px; color: var(--text-secondary); margin-bottom: 16px; }
+.dialog .dialog-btns { display: flex; gap: 8px; }
+.dialog .dialog-btns .btn { flex: 1; padding: 10px; }
+
+/* Info Window (Map) */
+.info-window {
+  position: absolute;
+  bottom: 56px;
+  left: 10px;
+  right: 10px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  transform: translateY(120%);
+  transition: transform 0.25s ease;
+  z-index: 50;
+}
+.info-window.show { transform: translateY(0); }
+
+/* Splash */
+#splash .splash-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+#splash .app-icon {
+  width: 64px; height: 64px;
+  background: var(--primary);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: #fff;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.3);
+}
+#splash .app-name { font-size: 22px; font-weight: 800; color: var(--primary); }
+#splash .app-tagline { font-size: 10px; color: var(--text-secondary); }
+.spinner {
+  width: 24px; height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Photo grid */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 0;
+}
+.photo-placeholder {
+  aspect-ratio: 1;
+  background: var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.photo-placeholder.add {
+  border: 2px dashed #CBD5E1;
+  background: transparent;
+  font-size: 20px;
+  color: #CBD5E1;
+}
+
+/* Info grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 14px;
+}
+.info-item {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+}
+.info-item .info-label { font-size: 9px; color: var(--text-secondary); margin-bottom: 2px; }
+.info-item .info-value { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+/* Tab content */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Content tabs */
+.content-tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.content-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.content-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+/* Transaction list */
+.tx-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.tx-item .tx-info .tx-type { font-size: 10px; color: var(--text-secondary); }
+.tx-item .tx-info .tx-detail { font-size: 11px; font-weight: 500; margin-top: 1px; }
+.tx-item .tx-price { font-size: 13px; font-weight: 700; color: var(--primary); }
+
+/* Inspection list */
+.insp-item {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.insp-item:active { background: var(--bg); }
+.insp-item .insp-date { font-size: 10px; color: var(--text-secondary); }
+.insp-item .insp-summary { font-size: 12px; font-weight: 500; margin-top: 2px; }
+.insp-item .insp-rating { margin-top: 4px; }
+
+/* Rating row */
+.rating-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #F1F5F9;
+}
+.rating-row .rating-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+
+/* Map */
+.map-area {
+  flex: 1;
+  background: #E8F0FE;
+  position: relative;
+  overflow: hidden;
+}
+.map-grid {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.map-road {
+  position: absolute;
+  background: rgba(37,99,235,0.08);
+  border-radius: 4px;
+}
+.map-marker {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+  z-index: 10;
+}
+.map-marker:active { transform: scale(1.1); }
+.map-marker .marker-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  border: 2px solid #fff;
+}
+.map-marker .marker-label {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: #fff;
+  padding: 1px 6px;
+  border-radius: 6px;
+  margin-top: 3px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.map-fab {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 36px; height: 36px;
+  background: var(--surface);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  z-index: 20;
+}
+
+/* Settings */
+.settings-section {
+  padding: 14px;
+}
+.settings-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--surface);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+}
+.settings-avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #60A5FA);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #fff;
+}
+.settings-name { font-size: 14px; font-weight: 600; }
+.settings-email { font-size: 10px; color: var(--text-secondary); }
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--surface);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+.settings-item .item-label { font-size: 12px; }
+.settings-item .item-value { font-size: 11px; color: var(--text-secondary); }
+
+/* Share settings */
+.share-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 0 14px 10px;
+  border: 1px solid var(--border);
+}
+.share-card .share-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+.role-toggle {
+  display: flex;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 10px;
+}
+.role-btn {
+  flex: 1;
+  padding: 6px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.role-btn.active {
+  background: var(--primary);
+  color: #fff;
+}
+.link-display {
+  display: none;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 8px;
+  font-size: 9px;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+.link-display.show { display: block; }
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #F1F5F9;
+}
+.member-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #E2E8F0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--text-secondary);
+}
+.member-info { flex: 1; }
+.member-name { font-size: 11px; font-weight: 500; }
+.member-role { font-size: 9px; color: var(--text-secondary); }
+
+/* Region select */
+.region-list { padding: 0; }
+.region-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 13px;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  color: var(--text-primary);
+  transition: background 0.1s;
+}
+.region-item:active { background: var(--bg); }
+.region-item .arrow { color: var(--text-secondary); font-size: 12px; }
+
+/* Search results */
+.search-results { padding: 0; }
+.search-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.search-item:active { background: var(--bg); }
+.search-item .search-name { font-size: 12px; font-weight: 500; }
+.search-item .search-addr { font-size: 10px; color: var(--text-secondary); margin-top: 1px; }
+
+/* Photo viewer */
+#photo-viewer {
+  background: #000 !important;
+}
+#photo-viewer .photo-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+#photo-viewer .photo-img {
+  width: 200px; height: 200px;
+  background: #333;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #666;
+  font-size: 40px;
+}
+#photo-viewer .photo-close {
+  position: absolute;
+  top: 44px;
+  right: 14px;
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+#photo-viewer .photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+#photo-viewer .photo-nav.prev { left: 8px; }
+#photo-viewer .photo-nav.next { right: 8px; }
+#photo-viewer .photo-counter {
+  text-align: center;
+  color: #fff;
+  font-size: 12px;
+  padding: 8px;
+}
+#photo-viewer .photo-caption {
+  text-align: center;
+  color: #999;
+  font-size: 10px;
+  padding: 0 14px 20px;
+}
+
+/* Section title */
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 12px 14px 6px;
+}
+
+/* Login */
+.login-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+}
+.login-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.login-logo .logo-icon {
+  width: 48px; height: 48px;
+  background: var(--primary);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  font-size: 22px; color: #fff;
+  margin-bottom: 8px;
+}
+.login-logo .logo-text { font-size: 20px; font-weight: 800; color: var(--primary); }
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+.login-divider .line { flex: 1; height: 1px; background: var(--border); }
+.login-divider .or { font-size: 10px; color: var(--text-secondary); }
+.signup-link {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.signup-link span {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.google-btn .g-icon {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Region chip in search */
+.region-chip {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 14px;
+  font-size: 10px;
+  font-weight: 500;
+  margin: 0 14px 8px;
+  width: fit-content;
+}
+.region-chip.show { display: inline-flex; }
+.region-chip .remove {
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Time slot chips */
+.time-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Overall rating big */
+.overall-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 0;
+}
+.overall-rating .star { font-size: 24px; }
+
+/* Section in create */
+.form-section {
+  padding: 12px 14px;
+}
+.form-section .form-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Side Panel -->
+  <div class="side-panel">
+    <h2>임장노트</h2>
+    <div class="subtitle">Interactive Prototype</div>
+
+    <div class="current-screen">
+      <div class="label">현재 화면</div>
+      <div class="name" id="currentScreenLabel">SPLASH</div>
+    </div>
+
+    <h3>화면 바로가기</h3>
+    <div class="nav-link active" data-screen="splash" onclick="goTo('splash')">Splash</div>
+    <div class="nav-link" data-screen="login" onclick="goTo('login')">Login</div>
+    <div class="nav-link" data-screen="signup" onclick="goTo('signup')">Signup</div>
+    <div class="nav-link" data-screen="home" onclick="goTo('home')">Home (단지 목록)</div>
+    <div class="nav-link" data-screen="search" onclick="goTo('search')">Search</div>
+    <div class="nav-link" data-screen="complex-detail" onclick="goTo('complex-detail')">Complex Detail</div>
+    <div class="nav-link" data-screen="insp-create" onclick="goTo('insp-create')">Inspection Create</div>
+    <div class="nav-link" data-screen="insp-detail" onclick="goTo('insp-detail')">Inspection Detail</div>
+    <div class="nav-link" data-screen="map" onclick="goTo('map')">Map (지도)</div>
+    <div class="nav-link" data-screen="share-settings" onclick="goTo('share-settings')">Share Settings</div>
+    <div class="nav-link" data-screen="settings" onclick="goTo('settings')">Settings (설정)</div>
+    <div class="nav-link" data-screen="region-select" onclick="goTo('region-select')">Region Select</div>
+    <div class="nav-link" data-screen="photo-viewer" onclick="goTo('photo-viewer')">Photo Viewer</div>
+
+    <div class="instructions">
+      화면을 클릭하여 탐색하세요.<br><br>
+      <strong>주요 플로우:</strong><br>
+      Splash &rarr; Login &rarr; Home<br>
+      Home &rarr; 카드 클릭 &rarr; Detail<br>
+      Detail &rarr; 임장기록 &rarr; 기록 작성<br>
+      Home &rarr; (+) FAB &rarr; Search<br>
+      하단 탭으로 화면 전환
+    </div>
+  </div>
+
+  <!-- Phone Frame -->
+  <div class="phone-frame">
+    <div class="dynamic-island"></div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- CONFIRM DIALOG -->
+    <div class="dialog-overlay" id="confirmDialog">
+      <div class="dialog">
+        <div class="dialog-title">로그아웃</div>
+        <div class="dialog-msg">정말 로그아웃 하시겠습니까?</div>
+        <div class="dialog-btns">
+          <button class="btn btn-secondary" onclick="hideDialog()">취소</button>
+          <button class="btn btn-danger" onclick="confirmLogout()">로그아웃</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SPLASH ===== -->
+    <div class="screen active" id="splash">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">
+          <span>&#9679;&#9679;&#9679;&#9679;</span>
+          <span>&#9632;</span>
+        </span>
+      </div>
+      <div class="splash-content">
+        <div class="app-icon">&#127970;</div>
+        <div class="app-name">임장노트</div>
+        <div class="app-tagline">똑똑한 아파트 임장 기록</div>
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <!-- ===== LOGIN ===== -->
+    <div class="screen" id="login">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="login-container">
+        <div class="login-logo">
+          <div class="logo-icon">&#127970;</div>
+          <div class="logo-text">임장노트</div>
+        </div>
+        <div class="input-group">
+          <label>이메일</label>
+          <input class="input-field" type="email" value="test@example.com">
+        </div>
+        <div class="input-group">
+          <label>비밀번호</label>
+          <input class="input-field" type="password" placeholder="비밀번호를 입력하세요">
+        </div>
+        <button class="btn btn-primary" onclick="goTo('home')" style="margin-top:8px">로그인</button>
+        <div class="login-divider">
+          <div class="line"></div>
+          <span class="or">또는</span>
+          <div class="line"></div>
+        </div>
+        <button class="btn btn-secondary google-btn" onclick="goTo('home')">
+          <span class="g-icon" style="color:#4285F4">G</span> Google로 로그인
+        </button>
+        <div class="signup-link">
+          계정이 없으신가요? <span onclick="goTo('signup')">회원가입</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SIGNUP ===== -->
+    <div class="screen" id="signup">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header">
+        <button class="back-btn" onclick="goTo('login')">&larr;</button>
+        <div class="title">회원가입</div>
+        <div style="width:28px"></div>
+      </div>
+      <div class="scroll-content" style="padding:16px">
+        <div class="input-group">
+          <label>이메일</label>
+          <input class="input-field" type="email" placeholder="이메일을 입력하세요">
+        </div>
+        <div class="input-group">
+          <label>비밀번호</label>
+          <input class="input-field" type="password" placeholder="비밀번호를 입력하세요">
+        </div>
+        <div class="input-group">
+          <label>비밀번호 확인</label>
+          <input class="input-field" type="password" placeholder="비밀번호를 다시 입력하세요">
+        </div>
+        <div class="input-group">
+          <label>닉네임</label>
+          <input class="input-field" type="text" placeholder="닉네임을 입력하세요">
+        </div>
+        <button class="btn btn-primary" onclick="goTo('home')" style="margin-top:8px">가입하기</button>
+      </div>
+    </div>
+
+    <!-- ===== HOME ===== -->
+    <div class="screen" id="home">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header" style="border-bottom:none;">
+        <div class="title" style="text-align:left;margin:0;font-size:18px;font-weight:800;">단지 목록</div>
+      </div>
+      <div class="chip-row" id="homeChips">
+        <div class="chip active" onclick="toggleChip(this)">전체</div>
+        <div class="chip" onclick="toggleChip(this)">관심</div>
+        <div class="chip" onclick="toggleChip(this)">방문예정</div>
+        <div class="chip" onclick="toggleChip(this)">방문완료</div>
+      </div>
+      <div class="scroll-content">
+        <div class="card" onclick="goTo('complex-detail')">
+          <div class="card-header">
+            <div>
+              <div class="card-title">래미안 블레스티지</div>
+              <div class="card-subtitle">서울 서초구 반포동</div>
+            </div>
+            <span class="badge visited">방문완료</span>
+          </div>
+          <div class="card-footer">
+            <span style="font-size:10px;color:var(--text-secondary)">2,800세대 &middot; 35동</span>
+            <span style="font-size:12px;color:#FBBF24;">&#9733; 4.5</span>
+          </div>
+        </div>
+        <div class="card" onclick="goTo('complex-detail')">
+          <div class="card-header">
+            <div>
+              <div class="card-title">자이 더 파크</div>
+              <div class="card-subtitle">서울 강남구 대치동</div>
+            </div>
+            <span class="badge planned">방문예정</span>
+          </div>
+          <div class="card-footer">
+            <span style="font-size:10px;color:var(--text-secondary)">1,200세대 &middot; 12동</span>
+            <span style="font-size:12px;color:var(--text-secondary)">-</span>
+          </div>
+        </div>
+        <div class="card" onclick="goTo('complex-detail')">
+          <div class="card-header">
+            <div>
+              <div class="card-title">힐스테이트 리버시티</div>
+              <div class="card-subtitle">서울 성동구 성수동</div>
+            </div>
+            <span class="badge interested">관심</span>
+          </div>
+          <div class="card-footer">
+            <span style="font-size:10px;color:var(--text-secondary)">980세대 &middot; 8동</span>
+            <span style="font-size:12px;color:var(--text-secondary)">-</span>
+          </div>
+        </div>
+      </div>
+      <button class="fab" onclick="goTo('search')">+</button>
+      <div class="bottom-tabs">
+        <button class="tab-item active" onclick="goTo('home')"><span class="tab-icon">&#127970;</span>단지</button>
+        <button class="tab-item" onclick="goTo('map')"><span class="tab-icon">&#128506;</span>지도</button>
+        <button class="tab-item" onclick="goTo('settings')"><span class="tab-icon">&#9881;</span>설정</button>
+      </div>
+    </div>
+
+    <!-- ===== SEARCH ===== -->
+    <div class="screen" id="search">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header">
+        <button class="back-btn" onclick="goTo('home')">&larr;</button>
+        <div class="title">단지 검색</div>
+        <div style="width:28px"></div>
+      </div>
+      <div style="padding:10px 14px 0">
+        <input class="input-field" id="searchInput" type="text" placeholder="단지명을 입력하세요" oninput="handleSearch(this.value)">
+      </div>
+      <div style="padding:6px 14px">
+        <button class="btn btn-secondary" onclick="goTo('region-select')" style="font-size:11px;padding:8px;text-align:left;display:flex;align-items:center;gap:6px">
+          <span>&#128205;</span> 지역 선택
+        </button>
+      </div>
+      <div class="region-chip" id="regionChip">
+        <span id="regionChipText">서울 &gt; 강남구 &gt; 대치동</span>
+        <span class="remove" onclick="clearRegion()">&times;</span>
+      </div>
+      <div class="scroll-content">
+        <div class="search-results" id="searchResults" style="display:none">
+          <div class="search-item" onclick="goTo('complex-detail')">
+            <div>
+              <div class="search-name">래미안 블레스티지</div>
+              <div class="search-addr">서울 서초구 반포동</div>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary)">&rsaquo;</span>
+          </div>
+          <div class="search-item" onclick="goTo('complex-detail')">
+            <div>
+              <div class="search-name">래미안 원베일리</div>
+              <div class="search-addr">서울 서초구 반포동</div>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary)">&rsaquo;</span>
+          </div>
+          <div class="search-item" onclick="goTo('complex-detail')">
+            <div>
+              <div class="search-name">래미안 퍼스티지</div>
+              <div class="search-addr">서울 서초구 서초동</div>
+            </div>
+            <span style="font-size:12px;color:var(--text-secondary)">&rsaquo;</span>
+          </div>
+        </div>
+        <div id="searchEmpty" style="text-align:center;padding:40px 14px;color:var(--text-secondary);font-size:11px;">
+          단지명을 검색하거나<br>지역을 선택하세요
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== COMPLEX DETAIL ===== -->
+    <div class="screen" id="complex-detail">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header">
+        <button class="back-btn" onclick="goTo('home')">&larr;</button>
+        <div class="title">래미안 블레스티지</div>
+        <button class="action-btn" onclick="goTo('share-settings')">&#128279;</button>
+      </div>
+      <div style="padding:8px 14px;display:flex;align-items:center;gap:8px;background:var(--surface);">
+        <span class="badge visited">방문완료</span>
+        <span style="font-size:12px;color:#FBBF24;">&#9733; 4.5</span>
+        <span style="font-size:10px;color:var(--text-secondary)">서울 서초구 반포동</span>
+      </div>
+      <div class="content-tabs" id="detailTabs">
+        <button class="content-tab active" onclick="switchDetailTab('info')">정보</button>
+        <button class="content-tab" onclick="switchDetailTab('tx')">실거래가</button>
+        <button class="content-tab" onclick="switchDetailTab('insp')">임장기록</button>
+      </div>
+      <div class="scroll-content">
+        <!-- Info Tab -->
+        <div class="tab-content active" id="tab-info">
+          <div style="padding-top:10px"></div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">세대수</div>
+              <div class="info-value">2,800</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">동수</div>
+              <div class="info-value">35동</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">준공년도</div>
+              <div class="info-value">2009년</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">용적률</div>
+              <div class="info-value">249%</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">건폐율</div>
+              <div class="info-value">18%</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">주차</div>
+              <div class="info-value">세대당 1.5대</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">난방</div>
+              <div class="info-value">지역난방</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">최고층</div>
+              <div class="info-value">35층</div>
+            </div>
+          </div>
+        </div>
+        <!-- Transaction Tab -->
+        <div class="tab-content" id="tab-tx">
+          <div class="section-title">최근 실거래 내역</div>
+          <div class="tx-item">
+            <div class="tx-info">
+              <div class="tx-type">84A &middot; 11층</div>
+              <div class="tx-detail">2024.02.15</div>
+            </div>
+            <div class="tx-price">28.5억</div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-info">
+              <div class="tx-type">84B &middot; 23층</div>
+              <div class="tx-detail">2024.01.28</div>
+            </div>
+            <div class="tx-price">30.2억</div>
+          </div>
+          <div class="tx-item">
+            <div class="tx-info">
+              <div class="tx-type">59A &middot; 7층</div>
+              <div class="tx-detail">2024.01.10</div>
+            </div>
+            <div class="tx-price">22.1억</div>
+          </div>
+        </div>
+        <!-- Inspection Tab -->
+        <div class="tab-content" id="tab-insp">
+          <div style="padding:10px 14px">
+            <button class="btn btn-primary" onclick="goTo('insp-create')" style="font-size:12px;padding:10px">+ 기록 작성</button>
+          </div>
+          <div class="insp-item" onclick="goTo('insp-detail')">
+            <div class="insp-date">2024년 3월 15일 &middot; 오후</div>
+            <div class="insp-summary">주변 환경 양호, 소음 약간 있음</div>
+            <div class="insp-rating" style="display:flex;gap:2px;margin-top:4px;">
+              <span class="star filled display-only">&#9733;</span>
+              <span class="star filled display-only">&#9733;</span>
+              <span class="star filled display-only">&#9733;</span>
+              <span class="star filled display-only">&#9733;</span>
+              <span class="star display-only">&#9733;</span>
+            </div>
+          </div>
+          <div class="insp-item" onclick="goTo('insp-detail')">
+            <div class="insp-date">2024년 2월 28일 &middot; 오전</div>
+            <div class="insp-summary">1차 방문, 전반적 인상 좋음</div>
+            <div class="insp-rating" style="display:flex;gap:2px;margin-top:4px;">
+              <span class="star filled display-only">&#9733;</span>
+              <span class="star filled display-only">&#9733;</span>
+              <span class="star filled display-only">&#9733;</span>
+              <span class="star filled display-only">&#9733;</span>
+              <span class="star filled display-only">&#9733;</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== INSP CREATE ===== -->
+    <div class="screen" id="insp-create">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header">
+        <button class="back-btn" onclick="goTo('complex-detail')">&larr;</button>
+        <div class="title">임장 기록</div>
+        <div style="width:28px"></div>
+      </div>
+      <div class="scroll-content" style="padding-bottom:20px">
+        <!-- Date -->
+        <div class="form-section">
+          <div class="form-label">방문 일시</div>
+          <div style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="this.style.borderColor=this.style.borderColor==='rgb(37, 99, 235)'?'#E2E8F0':'#2563EB'">
+            <span>2024년 3월 15일</span>
+            <span style="color:var(--text-secondary)">&#128197;</span>
+          </div>
+        </div>
+        <!-- Time slot -->
+        <div class="form-section">
+          <div class="form-label">시간대</div>
+          <div class="time-chips">
+            <div class="chip active" onclick="toggleChip(this)">오전</div>
+            <div class="chip" onclick="toggleChip(this)">오후</div>
+            <div class="chip" onclick="toggleChip(this)">저녁</div>
+            <div class="chip" onclick="toggleChip(this)">야간</div>
+          </div>
+        </div>
+        <!-- Ratings -->
+        <div class="form-section">
+          <div class="form-label">항목별 평가</div>
+          <div class="rating-row">
+            <span class="rating-label">소음</span>
+            <div class="stars" data-rating="3" id="rating-noise"></div>
+          </div>
+          <div class="rating-row">
+            <span class="rating-label">경사</span>
+            <div class="stars" data-rating="4" id="rating-slope"></div>
+          </div>
+          <div class="rating-row">
+            <span class="rating-label">상권</span>
+            <div class="stars" data-rating="4" id="rating-commerce"></div>
+          </div>
+          <div class="rating-row">
+            <span class="rating-label">주차</span>
+            <div class="stars" data-rating="3" id="rating-parking"></div>
+          </div>
+          <div class="rating-row">
+            <span class="rating-label">일조권</span>
+            <div class="stars" data-rating="5" id="rating-sunlight"></div>
+          </div>
+        </div>
+        <!-- Text areas -->
+        <div class="form-section">
+          <div class="form-label">장점</div>
+          <textarea class="input-field" placeholder="장점을 입력하세요">교통 편리, 학군 우수, 단지 내 조경 양호</textarea>
+        </div>
+        <div class="form-section">
+          <div class="form-label">단점</div>
+          <textarea class="input-field" placeholder="단점을 입력하세요">도로 소음 약간, 주차 공간 부족</textarea>
+        </div>
+        <div class="form-section">
+          <div class="form-label">총평</div>
+          <textarea class="input-field" placeholder="총평을 입력하세요">전반적으로 우수한 단지. 소음만 개선되면 최상.</textarea>
+        </div>
+        <!-- Photos -->
+        <div class="form-section">
+          <div class="form-label">사진</div>
+          <div class="photo-grid">
+            <div class="photo-placeholder">&#128247;</div>
+            <div class="photo-placeholder">&#128247;</div>
+            <div class="photo-placeholder add" onclick="showToast('카메라/갤러리 선택')">+</div>
+          </div>
+        </div>
+        <!-- Overall -->
+        <div class="form-section">
+          <div class="form-label" style="text-align:center">종합 평점</div>
+          <div class="overall-rating" id="overall-rating"></div>
+        </div>
+        <!-- Save -->
+        <div style="padding:0 14px">
+          <button class="btn btn-primary" onclick="saveInspection()">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== INSP DETAIL ===== -->
+    <div class="screen" id="insp-detail">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header">
+        <button class="back-btn" onclick="goTo('complex-detail')">&larr;</button>
+        <div class="title">임장 기록</div>
+        <button class="action-btn" onclick="goTo('insp-create')">&#9998;</button>
+      </div>
+      <div class="scroll-content" style="padding-bottom:20px">
+        <div class="form-section">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;font-weight:600">2024년 3월 15일</span>
+            <span class="chip active" style="cursor:default;font-size:10px">오후</span>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">항목별 평가</div>
+          <div class="rating-row">
+            <span class="rating-label">소음</span>
+            <div class="stars" style="display:flex;gap:2px"><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star display-only">&#9733;</span><span class="star display-only">&#9733;</span></div>
+          </div>
+          <div class="rating-row">
+            <span class="rating-label">경사</span>
+            <div class="stars" style="display:flex;gap:2px"><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star display-only">&#9733;</span></div>
+          </div>
+          <div class="rating-row">
+            <span class="rating-label">상권</span>
+            <div class="stars" style="display:flex;gap:2px"><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star display-only">&#9733;</span></div>
+          </div>
+          <div class="rating-row">
+            <span class="rating-label">주차</span>
+            <div class="stars" style="display:flex;gap:2px"><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star display-only">&#9733;</span><span class="star display-only">&#9733;</span></div>
+          </div>
+          <div class="rating-row">
+            <span class="rating-label">일조권</span>
+            <div class="stars" style="display:flex;gap:2px"><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span><span class="star filled display-only">&#9733;</span></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">장점</div>
+          <div style="font-size:12px;color:var(--text-primary);line-height:1.6;background:var(--surface);padding:10px;border-radius:8px;border:1px solid var(--border)">교통 편리, 학군 우수, 단지 내 조경 양호</div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">단점</div>
+          <div style="font-size:12px;color:var(--text-primary);line-height:1.6;background:var(--surface);padding:10px;border-radius:8px;border:1px solid var(--border)">도로 소음 약간, 주차 공간 부족</div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">총평</div>
+          <div style="font-size:12px;color:var(--text-primary);line-height:1.6;background:var(--surface);padding:10px;border-radius:8px;border:1px solid var(--border)">전반적으로 우수한 단지. 소음만 개선되면 최상.</div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">사진</div>
+          <div class="photo-grid">
+            <div class="photo-placeholder" onclick="goTo('photo-viewer')">&#128247;</div>
+            <div class="photo-placeholder" onclick="goTo('photo-viewer')">&#128247;</div>
+            <div class="photo-placeholder" onclick="goTo('photo-viewer')">&#128247;</div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label" style="text-align:center">종합 평점</div>
+          <div style="display:flex;justify-content:center;gap:4px;padding:8px 0">
+            <span class="star filled display-only" style="font-size:24px">&#9733;</span>
+            <span class="star filled display-only" style="font-size:24px">&#9733;</span>
+            <span class="star filled display-only" style="font-size:24px">&#9733;</span>
+            <span class="star filled display-only" style="font-size:24px">&#9733;</span>
+            <span class="star display-only" style="font-size:24px">&#9733;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MAP ===== -->
+    <div class="screen" id="map">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header" style="border-bottom:none">
+        <div class="title" style="text-align:left;margin:0;font-size:18px;font-weight:800;">지도</div>
+      </div>
+      <div class="chip-row" id="mapChips">
+        <div class="chip active" onclick="toggleChip(this)">전체</div>
+        <div class="chip" onclick="toggleChip(this)">관심</div>
+        <div class="chip" onclick="toggleChip(this)">방문예정</div>
+        <div class="chip" onclick="toggleChip(this)">방문완료</div>
+      </div>
+      <div class="map-area">
+        <div class="map-grid"></div>
+        <!-- Roads -->
+        <div class="map-road" style="top:40%;left:0;right:0;height:8px;"></div>
+        <div class="map-road" style="top:0;bottom:0;left:35%;width:8px;"></div>
+        <div class="map-road" style="top:65%;left:20%;right:10%;height:6px;transform:rotate(-5deg)"></div>
+        <!-- Markers -->
+        <div class="map-marker" style="top:25%;left:20%" onclick="showInfoWindow(0)">
+          <div class="marker-dot" style="background:var(--visited)">&#127970;</div>
+          <div class="marker-label">래미안</div>
+        </div>
+        <div class="map-marker" style="top:50%;left:55%" onclick="showInfoWindow(1)">
+          <div class="marker-dot" style="background:var(--planned)">&#127970;</div>
+          <div class="marker-label">자이</div>
+        </div>
+        <div class="map-marker" style="top:70%;left:30%" onclick="showInfoWindow(2)">
+          <div class="marker-dot" style="background:var(--interested)">&#127970;</div>
+          <div class="marker-label">힐스테이트</div>
+        </div>
+        <button class="map-fab" onclick="showToast('현재 위치로 이동')">&#9678;</button>
+        <!-- Info Window -->
+        <div class="info-window" id="mapInfoWindow">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-size:13px;font-weight:600" id="iwName">래미안 블레스티지</div>
+              <div style="font-size:10px;color:var(--text-secondary);margin-top:2px" id="iwAddr">서울 서초구 반포동</div>
+            </div>
+            <span class="badge visited" id="iwBadge">방문완료</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <span style="font-size:12px;color:#FBBF24" id="iwRating">&#9733; 4.5</span>
+            <button class="btn btn-primary" onclick="goTo('complex-detail')" style="width:auto;padding:6px 16px;font-size:11px">상세보기</button>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-tabs">
+        <button class="tab-item" onclick="goTo('home')"><span class="tab-icon">&#127970;</span>단지</button>
+        <button class="tab-item active" onclick="goTo('map')"><span class="tab-icon">&#128506;</span>지도</button>
+        <button class="tab-item" onclick="goTo('settings')"><span class="tab-icon">&#9881;</span>설정</button>
+      </div>
+    </div>
+
+    <!-- ===== SHARE SETTINGS ===== -->
+    <div class="screen" id="share-settings">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header">
+        <button class="back-btn" onclick="goTo('complex-detail')">&larr;</button>
+        <div class="title">공유 설정</div>
+        <div style="width:28px"></div>
+      </div>
+      <div class="scroll-content" style="padding-top:10px">
+        <div class="share-card">
+          <div class="share-title">링크 공유</div>
+          <div class="role-toggle">
+            <button class="role-btn active" onclick="toggleRole(this)">Editor</button>
+            <button class="role-btn" onclick="toggleRole(this)">Viewer</button>
+          </div>
+          <button class="btn btn-primary" onclick="generateLink()" style="font-size:11px;padding:8px">링크 생성</button>
+          <div class="link-display" id="shareLink">
+            https://imjangnote.app/share/abc123xyz<br><br>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-secondary" onclick="showToast('링크가 복사되었습니다')" style="font-size:10px;padding:6px">복사</button>
+              <button class="btn btn-secondary" onclick="showToast('공유하기')" style="font-size:10px;padding:6px">공유</button>
+            </div>
+            <div style="margin-top:6px;font-size:9px;color:var(--warning)">&#9888; 7일 후 만료</div>
+          </div>
+        </div>
+        <div class="share-card">
+          <div class="share-title">멤버</div>
+          <div class="member-item">
+            <div class="member-avatar">&#128100;</div>
+            <div class="member-info">
+              <div class="member-name">김철수 <span style="font-size:9px;color:var(--primary)">(나)</span></div>
+              <div class="member-role">Owner</div>
+            </div>
+          </div>
+          <div class="member-item">
+            <div class="member-avatar">&#128100;</div>
+            <div class="member-info">
+              <div class="member-name">이영희</div>
+              <div class="member-role">Editor</div>
+            </div>
+          </div>
+          <div class="member-item" style="border:none">
+            <div class="member-avatar">&#128100;</div>
+            <div class="member-info">
+              <div class="member-name">박지민</div>
+              <div class="member-role">Viewer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <div class="screen" id="settings">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header" style="border-bottom:none">
+        <div class="title" style="text-align:left;margin:0;font-size:18px;font-weight:800;">설정</div>
+      </div>
+      <div class="scroll-content">
+        <div class="settings-section">
+          <div class="settings-profile">
+            <div class="settings-avatar">&#128100;</div>
+            <div>
+              <div class="settings-name">홍길동</div>
+              <div class="settings-email">test@example.com</div>
+            </div>
+          </div>
+          <div class="settings-item">
+            <span class="item-label">앱 버전</span>
+            <span class="item-value">1.0.0</span>
+          </div>
+          <div class="settings-item">
+            <span class="item-label">알림 설정</span>
+            <span class="item-value">&rsaquo;</span>
+          </div>
+          <div class="settings-item">
+            <span class="item-label">이용약관</span>
+            <span class="item-value">&rsaquo;</span>
+          </div>
+          <div class="settings-item">
+            <span class="item-label">개인정보처리방침</span>
+            <span class="item-value">&rsaquo;</span>
+          </div>
+          <div style="margin-top:20px">
+            <button class="btn btn-danger" onclick="showLogoutDialog()" style="font-size:12px">로그아웃</button>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-tabs">
+        <button class="tab-item" onclick="goTo('home')"><span class="tab-icon">&#127970;</span>단지</button>
+        <button class="tab-item" onclick="goTo('map')"><span class="tab-icon">&#128506;</span>지도</button>
+        <button class="tab-item active" onclick="goTo('settings')"><span class="tab-icon">&#9881;</span>설정</button>
+      </div>
+    </div>
+
+    <!-- ===== REGION SELECT ===== -->
+    <div class="screen" id="region-select">
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span class="icons">&#9679;&#9679;&#9679;&#9679; &#9632;</span>
+      </div>
+      <div class="header">
+        <button class="back-btn" id="regionBackBtn" onclick="regionBack()">&larr;</button>
+        <div class="title" id="regionTitle">지역 선택</div>
+        <div style="width:28px"></div>
+      </div>
+      <div class="scroll-content">
+        <!-- Step 1 -->
+        <div class="region-list" id="regionStep1">
+          <button class="region-item" onclick="selectRegion1('서울특별시')">서울특별시 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion1('경기도')">경기도 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion1('부산광역시')">부산광역시 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion1('인천광역시')">인천광역시 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion1('대구광역시')">대구광역시 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion1('대전광역시')">대전광역시 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion1('광주광역시')">광주광역시 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion1('울산광역시')">울산광역시 <span class="arrow">&rsaquo;</span></button>
+        </div>
+        <!-- Step 2 -->
+        <div class="region-list" id="regionStep2" style="display:none">
+          <button class="region-item" onclick="selectRegion2('강남구')">강남구 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion2('서초구')">서초구 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion2('성동구')">성동구 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion2('송파구')">송파구 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion2('마포구')">마포구 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion2('용산구')">용산구 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion2('영등포구')">영등포구 <span class="arrow">&rsaquo;</span></button>
+          <button class="region-item" onclick="selectRegion2('강동구')">강동구 <span class="arrow">&rsaquo;</span></button>
+        </div>
+        <!-- Step 3 -->
+        <div class="region-list" id="regionStep3" style="display:none">
+          <button class="region-item" onclick="selectRegion3('대치동')">대치동</button>
+          <button class="region-item" onclick="selectRegion3('역삼동')">역삼동</button>
+          <button class="region-item" onclick="selectRegion3('삼성동')">삼성동</button>
+          <button class="region-item" onclick="selectRegion3('청담동')">청담동</button>
+          <button class="region-item" onclick="selectRegion3('논현동')">논현동</button>
+          <button class="region-item" onclick="selectRegion3('압구정동')">압구정동</button>
+          <button class="region-item" onclick="selectRegion3('도곡동')">도곡동</button>
+          <button class="region-item" onclick="selectRegion3('개포동')">개포동</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PHOTO VIEWER ===== -->
+    <div class="screen" id="photo-viewer">
+      <div class="photo-display">
+        <button class="photo-close" onclick="goTo('insp-detail')">&times;</button>
+        <button class="photo-nav prev" onclick="changePhoto(-1)">&lsaquo;</button>
+        <div class="photo-img">&#128247;</div>
+        <button class="photo-nav next" onclick="changePhoto(1)">&rsaquo;</button>
+      </div>
+      <div class="photo-counter" id="photoCounter">1 / 3</div>
+      <div class="photo-caption">단지 외관 전경</div>
+    </div>
+
+  </div><!-- phone-frame -->
+</div><!-- layout -->
+
+<script>
+// State
+let currentScreen = 'splash';
+let history = [];
+let regionStep = 1;
+let regionSelection = { city: '', district: '', dong: '' };
+let currentPhoto = 1;
+const totalPhotos = 3;
+const photoCaptions = ['단지 외관 전경', '놀이터 및 조경', '주차장 입구'];
+
+// Screen labels
+const screenLabels = {
+  'splash': 'SPLASH',
+  'login': 'LOGIN',
+  'signup': 'SIGNUP',
+  'home': 'HOME (단지 목록)',
+  'search': 'SEARCH',
+  'complex-detail': 'COMPLEX DETAIL',
+  'insp-create': 'INSP CREATE',
+  'insp-detail': 'INSP DETAIL',
+  'map': 'MAP (지도)',
+  'share-settings': 'SHARE SETTINGS',
+  'settings': 'SETTINGS (설정)',
+  'region-select': 'REGION SELECT',
+  'photo-viewer': 'PHOTO VIEWER'
+};
+
+// Navigate
+function goTo(screenId) {
+  if (screenId === currentScreen) return;
+  const oldEl = document.getElementById(currentScreen);
+  const newEl = document.getElementById(screenId);
+  if (!oldEl || !newEl) return;
+
+  // Push history
+  if (currentScreen !== 'splash') {
+    history.push(currentScreen);
+  }
+
+  oldEl.classList.remove('active');
+  oldEl.style.display = 'none';
+
+  newEl.style.display = 'flex';
+  newEl.classList.add('active');
+  newEl.style.animation = 'fadeIn 0.2s ease';
+
+  currentScreen = screenId;
+  updateSidePanel();
+
+  // Hide map info window when leaving map
+  if (screenId !== 'map') {
+    const iw = document.getElementById('mapInfoWindow');
+    if (iw) iw.classList.remove('show');
+  }
+}
+
+function updateSidePanel() {
+  document.getElementById('currentScreenLabel').textContent = screenLabels[currentScreen] || currentScreen;
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.screen === currentScreen);
+  });
+}
+
+// Splash auto-transition
+setTimeout(() => {
+  if (currentScreen === 'splash') goTo('login');
+}, 2000);
+
+// Chip toggle
+function toggleChip(el) {
+  const row = el.parentElement;
+  row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Detail tabs
+function switchDetailTab(tab) {
+  document.querySelectorAll('#detailTabs .content-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#complex-detail .tab-content').forEach(t => t.classList.remove('active'));
+
+  const tabs = { 'info': 0, 'tx': 1, 'insp': 2 };
+  document.querySelectorAll('#detailTabs .content-tab')[tabs[tab]].classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// Star ratings
+function initStars(containerId, initial) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  container.style.display = 'flex';
+  container.style.gap = '2px';
+  for (let i = 1; i <= 5; i++) {
+    const star = document.createElement('span');
+    star.className = 'star' + (i <= initial ? ' filled' : '');
+    star.textContent = '\u2733';
+    star.innerHTML = '&#9733;';
+    star.onclick = () => setRating(containerId, i);
+    container.appendChild(star);
+  }
+}
+
+function setRating(containerId, value) {
+  const container = document.getElementById(containerId);
+  container.querySelectorAll('.star').forEach((s, idx) => {
+    s.classList.toggle('filled', idx < value);
+  });
+  container.dataset.rating = value;
+}
+
+// Overall rating
+function initOverallRating() {
+  const container = document.getElementById('overall-rating');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const star = document.createElement('span');
+    star.className = 'star' + (i <= 4 ? ' filled' : '');
+    star.innerHTML = '&#9733;';
+    star.style.fontSize = '24px';
+    star.onclick = () => {
+      container.querySelectorAll('.star').forEach((s, idx) => {
+        s.classList.toggle('filled', idx < i);
+      });
+    };
+    container.appendChild(star);
+  }
+}
+
+// Init all ratings
+function initAllRatings() {
+  initStars('rating-noise', 3);
+  initStars('rating-slope', 4);
+  initStars('rating-commerce', 4);
+  initStars('rating-parking', 3);
+  initStars('rating-sunlight', 5);
+  initOverallRating();
+}
+initAllRatings();
+
+// Toast
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// Save inspection
+function saveInspection() {
+  showToast('저장되었습니다');
+  setTimeout(() => {
+    switchDetailTab('insp');
+    goTo('complex-detail');
+  }, 800);
+}
+
+// Search
+function handleSearch(val) {
+  const results = document.getElementById('searchResults');
+  const empty = document.getElementById('searchEmpty');
+  if (val.length > 0) {
+    results.style.display = 'block';
+    empty.style.display = 'none';
+  } else {
+    results.style.display = 'none';
+    empty.style.display = 'block';
+  }
+}
+
+// Region selection
+function selectRegion1(city) {
+  regionSelection.city = city;
+  regionStep = 2;
+  document.getElementById('regionStep1').style.display = 'none';
+  document.getElementById('regionStep2').style.display = 'block';
+  document.getElementById('regionTitle').textContent = city;
+}
+
+function selectRegion2(district) {
+  regionSelection.district = district;
+  regionStep = 3;
+  document.getElementById('regionStep2').style.display = 'none';
+  document.getElementById('regionStep3').style.display = 'block';
+  document.getElementById('regionTitle').textContent = district;
+}
+
+function selectRegion3(dong) {
+  regionSelection.dong = dong;
+  const text = regionSelection.city.replace('특별시','').replace('광역시','').replace('도','') + ' > ' + regionSelection.district + ' > ' + dong;
+  document.getElementById('regionChipText').textContent = text;
+  document.getElementById('regionChip').classList.add('show');
+  resetRegionSteps();
+  goTo('search');
+}
+
+function regionBack() {
+  if (regionStep === 3) {
+    regionStep = 2;
+    document.getElementById('regionStep3').style.display = 'none';
+    document.getElementById('regionStep2').style.display = 'block';
+    document.getElementById('regionTitle').textContent = regionSelection.city;
+  } else if (regionStep === 2) {
+    regionStep = 1;
+    document.getElementById('regionStep2').style.display = 'none';
+    document.getElementById('regionStep1').style.display = 'block';
+    document.getElementById('regionTitle').textContent = '지역 선택';
+  } else {
+    resetRegionSteps();
+    goTo('search');
+  }
+}
+
+function resetRegionSteps() {
+  regionStep = 1;
+  document.getElementById('regionStep1').style.display = 'block';
+  document.getElementById('regionStep2').style.display = 'none';
+  document.getElementById('regionStep3').style.display = 'none';
+  document.getElementById('regionTitle').textContent = '지역 선택';
+}
+
+function clearRegion() {
+  document.getElementById('regionChip').classList.remove('show');
+  regionSelection = { city: '', district: '', dong: '' };
+}
+
+// Map info window
+const markerData = [
+  { name: '래미안 블레스티지', addr: '서울 서초구 반포동', status: 'visited', statusText: '방문완료', rating: '&#9733; 4.5' },
+  { name: '자이 더 파크', addr: '서울 강남구 대치동', status: 'planned', statusText: '방문예정', rating: '-' },
+  { name: '힐스테이트 리버시티', addr: '서울 성동구 성수동', status: 'interested', statusText: '관심', rating: '-' },
+];
+
+function showInfoWindow(idx) {
+  const iw = document.getElementById('mapInfoWindow');
+  const d = markerData[idx];
+  document.getElementById('iwName').textContent = d.name;
+  document.getElementById('iwAddr').textContent = d.addr;
+  const badge = document.getElementById('iwBadge');
+  badge.textContent = d.statusText;
+  badge.className = 'badge ' + d.status;
+  document.getElementById('iwRating').innerHTML = d.rating;
+  iw.classList.add('show');
+}
+
+// Close info window on map area click (not on marker)
+document.querySelector('.map-area')?.addEventListener('click', function(e) {
+  if (!e.target.closest('.map-marker') && !e.target.closest('.info-window') && !e.target.closest('.map-fab')) {
+    document.getElementById('mapInfoWindow').classList.remove('show');
+  }
+});
+
+// Photo viewer
+function changePhoto(dir) {
+  currentPhoto += dir;
+  if (currentPhoto < 1) currentPhoto = totalPhotos;
+  if (currentPhoto > totalPhotos) currentPhoto = 1;
+  document.getElementById('photoCounter').textContent = currentPhoto + ' / ' + totalPhotos;
+  document.querySelector('#photo-viewer .photo-caption').textContent = photoCaptions[currentPhoto - 1];
+}
+
+// Logout
+function showLogoutDialog() {
+  document.getElementById('confirmDialog').classList.add('show');
+}
+function hideDialog() {
+  document.getElementById('confirmDialog').classList.remove('show');
+}
+function confirmLogout() {
+  hideDialog();
+  history = [];
+  goTo('login');
+  showToast('로그아웃 되었습니다');
+}
+
+// Role toggle
+function toggleRole(el) {
+  el.parentElement.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Generate link
+function generateLink() {
+  document.getElementById('shareLink').classList.add('show');
+  showToast('링크가 생성되었습니다');
+}
+
+// Init
+updateSidePanel();
+</script>
+</body>
+</html>

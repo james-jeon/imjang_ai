@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>임장노트 - 상세 디자인 시안</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #2563EB;
+  --secondary: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --border: #E2E8F0;
+  --interested: #FFC107;
+  --planned: #2196F3;
+  --visited: #4CAF50;
+  --revisit: #FF9800;
+  --excluded: #9E9E9E;
+  --phone-w: 280px;
+  --phone-h: 606px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR',sans-serif; background:#F1F5F9; color:var(--text-primary); }
+.page-header { background:linear-gradient(135deg,#1E293B 0%,#334155 100%); color:#fff; padding:48px 32px 32px; text-align:center; }
+.page-header h1 { font-size:32px; font-weight:800; margin-bottom:8px; }
+.page-header p { font-size:15px; color:#94A3B8; }
+.screen-section { max-width:1200px; margin:40px auto; padding:0 20px; }
+.screen-section h2 { font-size:24px; font-weight:700; margin-bottom:4px; color:var(--text-primary); padding-left:12px; border-left:4px solid var(--primary); }
+.screen-section .screen-desc { font-size:14px; color:var(--text-secondary); margin-bottom:24px; padding-left:16px; }
+.proposals { display:flex; gap:32px; justify-content:center; flex-wrap:wrap; margin-bottom:32px; }
+.proposal { display:flex; flex-direction:column; align-items:center; }
+.proposal-label { font-size:14px; font-weight:600; color:var(--primary); margin-bottom:10px; text-align:center; max-width:280px; }
+/* Phone Frame */
+.phone { width:var(--phone-w); height:var(--phone-h); border-radius:40px; border:5px solid #1c1c1e; background:var(--bg); position:relative; overflow:hidden; flex-shrink:0; box-shadow:0 8px 32px rgba(0,0,0,.18); }
+.dynamic-island { width:90px; height:24px; background:#1c1c1e; border-radius:14px; position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:10; }
+.status-bar { height:38px; display:flex; align-items:flex-end; justify-content:space-between; padding:0 20px 4px; font-size:11px; font-weight:600; color:var(--text-primary); position:relative; z-index:5; background:transparent; }
+.status-bar .time { font-weight:700; }
+.status-bar .icons { display:flex; gap:4px; align-items:center; font-size:10px; }
+.screen-content { height:calc(var(--phone-h) - 38px - 10px); overflow-y:auto; overflow-x:hidden; position:relative; }
+.screen-content::-webkit-scrollbar { display:none; }
+/* Bottom Tab */
+.bottom-tab { position:absolute; bottom:0; left:0; right:0; height:56px; background:#fff; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; z-index:20; padding-bottom:8px; }
+.tab-item { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; color:var(--text-secondary); }
+.tab-item.active { color:var(--primary); }
+.tab-item .tab-icon { font-size:18px; }
+/* Comparison Table */
+.comparison { max-width:1100px; margin:0 auto 48px; padding:0 20px; }
+.comparison h3 { font-size:16px; font-weight:600; margin-bottom:12px; }
+.comparison table { width:100%; border-collapse:collapse; font-size:13px; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.comparison th,.comparison td { padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+.comparison th { background:#F8FAFC; font-weight:600; color:var(--text-secondary); }
+.comparison td:first-child { font-weight:500; }
+/* Common UI pieces */
+.app-bar { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; background:#fff; }
+.app-bar-title { font-size:17px; font-weight:700; }
+.chip { display:inline-block; padding:4px 10px; border-radius:14px; font-size:11px; font-weight:500; background:#EEF2FF; color:var(--primary); white-space:nowrap; }
+.chip.active { background:var(--primary); color:#fff; }
+.chip-row { display:flex; gap:5px; padding:6px 14px; overflow-x:auto; flex-wrap:nowrap; }
+.chip-row::-webkit-scrollbar { display:none; }
+.card { background:#fff; border-radius:12px; padding:12px; margin:0 14px 8px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; color:#fff; }
+.badge-visited { background:var(--visited); }
+.badge-planned { background:var(--planned); }
+.badge-interested { background:var(--interested); color:#333; }
+.badge-revisit { background:var(--revisit); }
+.badge-excluded { background:var(--excluded); }
+.fab { position:absolute; bottom:66px; right:16px; width:44px; height:44px; border-radius:22px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:300; box-shadow:0 4px 12px rgba(37,99,235,.4); z-index:15; }
+.star { color:#F59E0B; font-size:12px; }
+.text-sm { font-size:12px; }
+.text-xs { font-size:10px; }
+.text-secondary { color:var(--text-secondary); }
+.text-caption { font-size:13px; color:var(--text-secondary); }
+.mt-4 { margin-top:4px; }
+.mt-8 { margin-top:8px; }
+.mb-4 { margin-bottom:4px; }
+.mb-8 { margin-bottom:8px; }
+.px-14 { padding-left:14px; padding-right:14px; }
+.flex { display:flex; }
+.items-center { align-items:center; }
+.justify-between { justify-content:space-between; }
+.gap-4 { gap:4px; }
+.gap-6 { gap:6px; }
+.gap-8 { gap:8px; }
+.w-full { width:100%; }
+.rounded-lg { border-radius:8px; }
+.bg-surface { background:var(--surface); }
+.border-b { border-bottom:1px solid var(--border); }
+.rating-stars { display:flex; gap:1px; }
+.section-title { font-size:14px; font-weight:600; padding:10px 14px 6px; }
+.input-field { width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:inherit; background:#F8FAFC; resize:none; }
+.btn-primary { background:var(--primary); color:#fff; border:none; border-radius:8px; padding:10px 16px; font-size:14px; font-weight:600; width:100%; font-family:inherit; cursor:pointer; }
+.btn-outline { background:transparent; color:var(--primary); border:1px solid var(--primary); border-radius:8px; padding:8px 14px; font-size:12px; font-weight:500; font-family:inherit; }
+.divider { height:1px; background:var(--border); margin:8px 0; }
+.progress-bar { height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--primary); border-radius:2px; }
+.avatar { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:#fff; flex-shrink:0; }
+.map-placeholder { background:linear-gradient(135deg,#E8F0FE 0%,#D1E5F7 50%,#E8F0FE 100%); position:relative; }
+.map-grid { position:absolute; inset:0; opacity:.15; background-image:linear-gradient(#94A3B8 1px,transparent 1px),linear-gradient(90deg,#94A3B8 1px,transparent 1px); background-size:40px 40px; }
+.map-road { position:absolute; background:#B0BEC5; opacity:.3; }
+.map-marker { position:absolute; width:24px; height:24px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.2); z-index:3; }
+.map-marker::after { content:''; width:8px; height:8px; background:#fff; border-radius:50%; transform:rotate(45deg); }
+.info-window { background:#fff; border-radius:10px; padding:10px; box-shadow:0 2px 12px rgba(0,0,0,.15); position:absolute; z-index:5; min-width:140px; }
+.search-float { position:absolute; top:8px; left:10px; right:10px; z-index:5; }
+.search-box { width:100%; padding:8px 12px 8px 32px; border:none; border-radius:10px; font-size:13px; font-family:inherit; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>임장노트 상세 디자인 시안</h1>
+  <p>5개 핵심 화면 × 3개 시안 = 총 15개 목업</p>
+</div>
+
+<!-- ========== SCREEN 1: SCR-HOME ========== -->
+<div class="screen-section">
+  <h2>SCREEN 1: SCR-HOME (홈 - 단지 목록)</h2>
+  <p class="screen-desc">등록된 아파트 단지 목록을 관리하고 필터링하는 메인 화면</p>
+  <div class="proposals">
+
+    <!-- Proposal A -->
+    <div class="proposal">
+      <div class="proposal-label">시안 A: 카드 리스트 + 상단 요약</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <!-- App Bar -->
+          <div class="app-bar border-b">
+            <div class="app-bar-title">임장노트</div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span style="font-size:10px;color:var(--secondary);background:#ECFDF5;padding:2px 6px;border-radius:4px;">● 온라인</span>
+              <span style="font-size:16px;">🔍</span>
+            </div>
+          </div>
+          <!-- Summary Stats -->
+          <div style="display:flex;gap:8px;padding:10px 14px;">
+            <div style="flex:1;background:#EEF2FF;border-radius:8px;padding:8px;text-align:center;">
+              <div style="font-size:18px;font-weight:700;color:var(--primary);">3</div>
+              <div style="font-size:10px;color:var(--text-secondary);">총 단지</div>
+            </div>
+            <div style="flex:1;background:#ECFDF5;border-radius:8px;padding:8px;text-align:center;">
+              <div style="font-size:18px;font-weight:700;color:var(--secondary);">1</div>
+              <div style="font-size:10px;color:var(--text-secondary);">방문완료</div>
+            </div>
+            <div style="flex:1;background:#FEF3C7;border-radius:8px;padding:8px;text-align:center;">
+              <div style="font-size:18px;font-weight:700;color:var(--warning);">1</div>
+              <div style="font-size:10px;color:var(--text-secondary);">관심</div>
+            </div>
+          </div>
+          <!-- Filters -->
+          <div class="chip-row">
+            <span class="chip active">전체</span>
+            <span class="chip">관심</span>
+            <span class="chip">방문예정</span>
+            <span class="chip">방문완료</span>
+            <span class="chip">재방문</span>
+          </div>
+          <!-- Sort -->
+          <div style="padding:4px 14px;display:flex;justify-content:flex-end;">
+            <span style="font-size:11px;color:var(--text-secondary);">최근등록순 ▾</span>
+          </div>
+          <!-- Cards -->
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:600;">래미안 블레스티지</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">서울 서초구 반포동</div>
+              </div>
+              <span class="badge badge-visited">방문완료</span>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-secondary);">2024.03.15 방문</span>
+              <div><span class="star">★★★★</span><span class="star" style="color:#E2E8F0;">★</span> <span style="font-size:11px;font-weight:600;">4.5</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:600;">자이 더 파크</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">서울 강남구 대치동</div>
+              </div>
+              <span class="badge badge-planned">방문예정</span>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-secondary);">방문 기록 없음</span>
+              <span style="font-size:11px;color:var(--text-secondary);">—</span>
+            </div>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:600;">힐스테이트 리버시티</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">서울 성동구 성수동</div>
+              </div>
+              <span class="badge badge-interested">관심</span>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-secondary);">방문 기록 없음</span>
+              <span style="font-size:11px;color:var(--text-secondary);">—</span>
+            </div>
+          </div>
+          <div style="height:70px;"></div>
+          <!-- FAB + Tab -->
+          <div class="fab">+</div>
+          <div class="bottom-tab">
+            <div class="tab-item active"><span class="tab-icon">🏢</span>단지</div>
+            <div class="tab-item"><span class="tab-icon">🗺</span>지도</div>
+            <div class="tab-item"><span class="tab-icon">⚙</span>설정</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal B -->
+    <div class="proposal">
+      <div class="proposal-label">시안 B: 컴팩트 타일 + 퀵 필터</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <div class="app-bar-title">임장노트</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="font-size:16px;">🔍</span>
+            </div>
+          </div>
+          <!-- Quick Filter Bar -->
+          <div style="background:#fff;padding:8px 14px;border-bottom:1px solid var(--border);">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <span class="chip active" style="font-size:12px;padding:6px 14px;">전체 3</span>
+              <span class="chip" style="font-size:12px;padding:6px 14px;">관심 1</span>
+              <span class="chip" style="font-size:12px;padding:6px 14px;">예정 1</span>
+              <span class="chip" style="font-size:12px;padding:6px 14px;">완료 1</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-secondary);">최근등록순</span>
+              <div style="display:flex;gap:6px;">
+                <span style="font-size:11px;padding:3px 8px;border:1px solid var(--primary);border-radius:4px;color:var(--primary);background:#EEF2FF;">▤</span>
+                <span style="font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:4px;color:var(--text-secondary);">▦</span>
+              </div>
+            </div>
+          </div>
+          <!-- 2-Column Tiles -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;">
+            <div style="background:#fff;border-radius:10px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+              <div style="width:100%;height:48px;background:linear-gradient(135deg,#DBEAFE,#BFDBFE);border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;">
+                <span style="font-size:20px;">🏢</span>
+              </div>
+              <div style="font-size:12px;font-weight:600;line-height:1.3;">래미안 블레스티지</div>
+              <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">서초구 반포동</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+                <span class="badge badge-visited" style="font-size:9px;">방문완료</span>
+                <span style="font-size:10px;color:#F59E0B;">★4.5</span>
+              </div>
+            </div>
+            <div style="background:#fff;border-radius:10px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+              <div style="width:100%;height:48px;background:linear-gradient(135deg,#D1FAE5,#A7F3D0);border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;">
+                <span style="font-size:20px;">🏗</span>
+              </div>
+              <div style="font-size:12px;font-weight:600;line-height:1.3;">자이 더 파크</div>
+              <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">강남구 대치동</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+                <span class="badge badge-planned" style="font-size:9px;">방문예정</span>
+                <span style="font-size:10px;color:var(--text-secondary);">—</span>
+              </div>
+            </div>
+            <div style="background:#fff;border-radius:10px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+              <div style="width:100%;height:48px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;">
+                <span style="font-size:20px;">🏠</span>
+              </div>
+              <div style="font-size:12px;font-weight:600;line-height:1.3;">힐스테이트 리버시티</div>
+              <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">성동구 성수동</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+                <span class="badge badge-interested" style="font-size:9px;">관심</span>
+                <span style="font-size:10px;color:var(--text-secondary);">—</span>
+              </div>
+            </div>
+            <div style="background:#fff;border-radius:10px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;">
+              <span style="font-size:24px;color:var(--primary);">+</span>
+              <span style="font-size:11px;color:var(--text-secondary);">단지 추가</span>
+            </div>
+          </div>
+          <div style="height:70px;"></div>
+          <div class="bottom-tab">
+            <div class="tab-item active"><span class="tab-icon">🏢</span>단지</div>
+            <div class="tab-item"><span class="tab-icon">🗺</span>지도</div>
+            <div class="tab-item"><span class="tab-icon">⚙</span>설정</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal C -->
+    <div class="proposal">
+      <div class="proposal-label">시안 C: 대시보드 + 카드 캐러셀</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div style="background:linear-gradient(135deg,#1E40AF,#2563EB);padding:14px;color:#fff;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div style="font-size:17px;font-weight:700;">임장노트</div>
+              <span style="font-size:10px;background:rgba(255,255,255,.2);padding:3px 8px;border-radius:12px;">● 온라인</span>
+            </div>
+            <!-- Dashboard Stats -->
+            <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:12px;">
+              <div style="font-size:11px;opacity:.8;margin-bottom:8px;">임장 현황</div>
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <div style="flex:1;text-align:center;">
+                  <div style="font-size:22px;font-weight:700;">3</div>
+                  <div style="font-size:9px;opacity:.7;">전체</div>
+                </div>
+                <div style="width:1px;background:rgba(255,255,255,.2);"></div>
+                <div style="flex:1;text-align:center;">
+                  <div style="font-size:22px;font-weight:700;">1</div>
+                  <div style="font-size:9px;opacity:.7;">완료</div>
+                </div>
+                <div style="width:1px;background:rgba(255,255,255,.2);"></div>
+                <div style="flex:1;text-align:center;">
+                  <div style="font-size:22px;font-weight:700;">1</div>
+                  <div style="font-size:9px;opacity:.7;">예정</div>
+                </div>
+              </div>
+              <!-- Progress Bar -->
+              <div style="background:rgba(255,255,255,.15);height:6px;border-radius:3px;overflow:hidden;">
+                <div style="display:flex;height:100%;">
+                  <div style="width:33%;background:var(--visited);"></div>
+                  <div style="width:33%;background:var(--planned);"></div>
+                  <div style="width:34%;background:var(--interested);"></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;margin-top:6px;font-size:9px;opacity:.7;">
+                <span>● 완료</span><span>● 예정</span><span>● 관심</span>
+              </div>
+            </div>
+          </div>
+          <!-- Section: 방문완료 -->
+          <div style="padding:10px 14px 4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:600;">방문완료</span>
+              <span style="font-size:11px;color:var(--primary);">전체보기 ›</span>
+            </div>
+          </div>
+          <div style="padding:4px 14px;">
+            <div style="background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:3px solid var(--visited);">
+              <div style="font-size:14px;font-weight:600;">래미안 블레스티지</div>
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">서울 서초구 반포동 · 2024.03.15</div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                <span style="font-size:10px;color:var(--text-secondary);">2,800세대 · 35개동</span>
+                <span style="font-size:11px;color:#F59E0B;">★ 4.5</span>
+              </div>
+            </div>
+          </div>
+          <!-- Section: 방문예정 -->
+          <div style="padding:10px 14px 4px;">
+            <span style="font-size:13px;font-weight:600;">방문예정</span>
+          </div>
+          <div style="padding:4px 14px;">
+            <div style="background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:3px solid var(--planned);">
+              <div style="font-size:14px;font-weight:600;">자이 더 파크</div>
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">서울 강남구 대치동</div>
+            </div>
+          </div>
+          <!-- Section: 관심 -->
+          <div style="padding:10px 14px 4px;">
+            <span style="font-size:13px;font-weight:600;">관심</span>
+          </div>
+          <div style="padding:4px 14px;">
+            <div style="background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:3px solid var(--interested);">
+              <div style="font-size:14px;font-weight:600;">힐스테이트 리버시티</div>
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">서울 성동구 성수동</div>
+            </div>
+          </div>
+          <div style="height:70px;"></div>
+          <div class="fab">+</div>
+          <div class="bottom-tab">
+            <div class="tab-item active"><span class="tab-icon">🏢</span>단지</div>
+            <div class="tab-item"><span class="tab-icon">🗺</span>지도</div>
+            <div class="tab-item"><span class="tab-icon">⚙</span>설정</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison -->
+  <div class="comparison">
+    <h3>SCR-HOME 시안 비교</h3>
+    <table>
+      <tr><th>항목</th><th>시안 A</th><th>시안 B</th><th>시안 C</th></tr>
+      <tr><td>레이아웃</td><td>세로 카드 리스트</td><td>2열 타일 그리드</td><td>대시보드 + 그룹</td></tr>
+      <tr><td>정보 밀도</td><td>높음 (상세 표시)</td><td>중간 (핵심만)</td><td>중간 (그룹별)</td></tr>
+      <tr><td>스캔 용이성</td><td>순차 스캔</td><td>빠른 비교</td><td>상태별 분류</td></tr>
+      <tr><td>빈 공간 활용</td><td>별도 empty state</td><td>추가 타일로 유도</td><td>대시보드 영역</td></tr>
+      <tr><td>적합 사용자</td><td>상세 정보 선호</td><td>빠른 탐색 선호</td><td>전체 현황 파악</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ========== SCREEN 2: SCR-COMPLEX-DETAIL ========== -->
+<div class="screen-section">
+  <h2>SCREEN 2: SCR-COMPLEX-DETAIL (단지 상세)</h2>
+  <p class="screen-desc">선택한 아파트 단지의 상세 정보, 실거래가, 임장기록을 확인하는 화면</p>
+  <div class="proposals">
+
+    <!-- Proposal A -->
+    <div class="proposal">
+      <div class="proposal-label">시안 A: 정보 카드 + 세그먼트 탭</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <span style="font-size:16px;">←</span>
+            <div class="app-bar-title">단지 상세</div>
+            <span style="font-size:16px;">↗</span>
+          </div>
+          <!-- Header Card -->
+          <div style="background:linear-gradient(135deg,#EEF2FF,#DBEAFE);padding:14px;margin:8px 14px;border-radius:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:16px;font-weight:700;">래미안 블레스티지</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-top:3px;">서울 서초구 반포대로 123</div>
+              </div>
+              <span class="badge badge-visited">방문완료</span>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:10px;">
+              <div><span style="font-size:10px;color:var(--text-secondary);">세대수</span><br><span style="font-size:13px;font-weight:600;">2,800</span></div>
+              <div><span style="font-size:10px;color:var(--text-secondary);">동수</span><br><span style="font-size:13px;font-weight:600;">35</span></div>
+              <div><span style="font-size:10px;color:var(--text-secondary);">최고층</span><br><span style="font-size:13px;font-weight:600;">35층</span></div>
+            </div>
+          </div>
+          <!-- Segment Tabs -->
+          <div style="display:flex;margin:0 14px;background:#EEF2FF;border-radius:8px;padding:2px;">
+            <div style="flex:1;text-align:center;padding:6px;background:var(--primary);color:#fff;border-radius:6px;font-size:12px;font-weight:600;">정보</div>
+            <div style="flex:1;text-align:center;padding:6px;font-size:12px;color:var(--text-secondary);">실거래가</div>
+            <div style="flex:1;text-align:center;padding:6px;font-size:12px;color:var(--text-secondary);">임장기록</div>
+          </div>
+          <!-- Info Content -->
+          <div class="card" style="margin-top:10px;">
+            <div style="font-size:12px;font-weight:600;margin-bottom:8px;">기본 정보</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
+              <div><span style="color:var(--text-secondary);">난방</span><br><span style="font-weight:500;">지역난방</span></div>
+              <div><span style="color:var(--text-secondary);">사용승인일</span><br><span style="font-weight:500;">2009.12</span></div>
+              <div><span style="color:var(--text-secondary);">건설사</span><br><span style="font-weight:500;">삼성물산</span></div>
+              <div><span style="color:var(--text-secondary);">용적률</span><br><span style="font-weight:500;">249%</span></div>
+              <div><span style="color:var(--text-secondary);">건폐율</span><br><span style="font-weight:500;">18%</span></div>
+              <div><span style="color:var(--text-secondary);">층수</span><br><span style="font-weight:500;">15~35층</span></div>
+            </div>
+          </div>
+          <div style="height:20px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal B -->
+    <div class="proposal">
+      <div class="proposal-label">시안 B: 풀스크린 헤더 + 슬라이딩 패널</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar" style="color:#fff;"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <!-- Hero Header -->
+          <div style="background:linear-gradient(180deg,#1E3A5F 0%,#2563EB 100%);padding:0 14px 16px;color:#fff;height:150px;display:flex;flex-direction:column;justify-content:flex-end;">
+            <div style="position:absolute;top:42px;left:14px;font-size:16px;color:#fff;">←</div>
+            <div style="position:absolute;top:42px;right:14px;font-size:16px;color:#fff;">↗</div>
+            <span class="badge badge-visited" style="margin-bottom:6px;align-self:flex-start;">방문완료</span>
+            <div style="font-size:18px;font-weight:700;">래미안 블레스티지</div>
+            <div style="font-size:11px;opacity:.8;margin-top:3px;">서울 서초구 반포대로 123</div>
+            <div style="display:flex;gap:14px;margin-top:8px;font-size:10px;opacity:.8;">
+              <span>2,800세대</span><span>35개동</span><span>★ 4.5</span>
+            </div>
+          </div>
+          <!-- Bottom Sheet Panel -->
+          <div style="background:#fff;border-radius:16px 16px 0 0;margin-top:-12px;position:relative;z-index:2;min-height:280px;">
+            <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:8px auto;"></div>
+            <!-- Tabs -->
+            <div style="display:flex;border-bottom:1px solid var(--border);">
+              <div style="flex:1;text-align:center;padding:10px;font-size:12px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);">정보</div>
+              <div style="flex:1;text-align:center;padding:10px;font-size:12px;color:var(--text-secondary);">실거래가</div>
+              <div style="flex:1;text-align:center;padding:10px;font-size:12px;color:var(--text-secondary);">임장기록</div>
+            </div>
+            <!-- Info Grid -->
+            <div style="padding:12px 14px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div style="background:var(--bg);border-radius:8px;padding:10px;">
+                  <div style="font-size:10px;color:var(--text-secondary);">세대수</div>
+                  <div style="font-size:14px;font-weight:600;">2,800세대</div>
+                </div>
+                <div style="background:var(--bg);border-radius:8px;padding:10px;">
+                  <div style="font-size:10px;color:var(--text-secondary);">동수</div>
+                  <div style="font-size:14px;font-weight:600;">35개동</div>
+                </div>
+                <div style="background:var(--bg);border-radius:8px;padding:10px;">
+                  <div style="font-size:10px;color:var(--text-secondary);">난방</div>
+                  <div style="font-size:14px;font-weight:600;">지역난방</div>
+                </div>
+                <div style="background:var(--bg);border-radius:8px;padding:10px;">
+                  <div style="font-size:10px;color:var(--text-secondary);">건설사</div>
+                  <div style="font-size:14px;font-weight:600;">삼성물산</div>
+                </div>
+                <div style="background:var(--bg);border-radius:8px;padding:10px;">
+                  <div style="font-size:10px;color:var(--text-secondary);">용적률 / 건폐율</div>
+                  <div style="font-size:14px;font-weight:600;">249% / 18%</div>
+                </div>
+                <div style="background:var(--bg);border-radius:8px;padding:10px;">
+                  <div style="font-size:10px;color:var(--text-secondary);">사용승인일</div>
+                  <div style="font-size:14px;font-weight:600;">2009.12</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal C -->
+    <div class="proposal">
+      <div class="proposal-label">시안 C: 세그먼트 탭 + 인라인 확장</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <span style="font-size:16px;">←</span>
+            <div class="app-bar-title">래미안 블레스티지</div>
+            <span style="font-size:16px;">↗</span>
+          </div>
+          <!-- Compact Header -->
+          <div style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-size:11px;color:var(--text-secondary);">서울 서초구 반포대로 123</div>
+              <div style="display:flex;gap:8px;margin-top:4px;align-items:center;">
+                <span class="badge badge-visited">방문완료</span>
+                <span style="font-size:12px;color:#F59E0B;">★ 4.5</span>
+              </div>
+            </div>
+            <div style="text-align:center;background:var(--bg);padding:6px 10px;border-radius:8px;">
+              <div style="font-size:16px;font-weight:700;color:var(--primary);">2,800</div>
+              <div style="font-size:9px;color:var(--text-secondary);">세대</div>
+            </div>
+          </div>
+          <!-- Tabs -->
+          <div style="display:flex;background:#fff;border-bottom:1px solid var(--border);">
+            <div style="flex:1;text-align:center;padding:10px;font-size:12px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);">정보</div>
+            <div style="flex:1;text-align:center;padding:10px;font-size:12px;color:var(--text-secondary);">실거래가</div>
+            <div style="flex:1;text-align:center;padding:10px;font-size:12px;color:var(--text-secondary);">임장기록</div>
+          </div>
+          <!-- Expandable Sections -->
+          <div style="padding:8px 14px;">
+            <!-- Section 1 - Expanded -->
+            <div style="background:#fff;border-radius:10px;margin-bottom:6px;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden;">
+              <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;background:#FAFBFC;">
+                <span style="font-size:12px;font-weight:600;">기본 정보</span>
+                <span style="font-size:10px;color:var(--text-secondary);">▲</span>
+              </div>
+              <div style="padding:8px 12px;">
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                  <div style="flex:0 0 48%;padding:6px 0;border-bottom:1px solid #F1F5F9;">
+                    <div style="font-size:10px;color:var(--text-secondary);">세대수</div>
+                    <div style="font-size:12px;font-weight:500;">2,800세대</div>
+                  </div>
+                  <div style="flex:0 0 48%;padding:6px 0;border-bottom:1px solid #F1F5F9;">
+                    <div style="font-size:10px;color:var(--text-secondary);">동수</div>
+                    <div style="font-size:12px;font-weight:500;">35개동</div>
+                  </div>
+                  <div style="flex:0 0 48%;padding:6px 0;border-bottom:1px solid #F1F5F9;">
+                    <div style="font-size:10px;color:var(--text-secondary);">난방</div>
+                    <div style="font-size:12px;font-weight:500;">지역난방</div>
+                  </div>
+                  <div style="flex:0 0 48%;padding:6px 0;border-bottom:1px solid #F1F5F9;">
+                    <div style="font-size:10px;color:var(--text-secondary);">층수</div>
+                    <div style="font-size:12px;font-weight:500;">15~35층</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Section 2 - Collapsed -->
+            <div style="background:#fff;border-radius:10px;margin-bottom:6px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+              <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:12px;font-weight:600;">건축 정보</span>
+                <span style="font-size:10px;color:var(--text-secondary);">▼</span>
+              </div>
+            </div>
+            <!-- Section 3 - Collapsed -->
+            <div style="background:#fff;border-radius:10px;margin-bottom:6px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+              <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:12px;font-weight:600;">위치 / 교통</span>
+                <span style="font-size:10px;color:var(--text-secondary);">▼</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <h3>SCR-COMPLEX-DETAIL 시안 비교</h3>
+    <table>
+      <tr><th>항목</th><th>시안 A</th><th>시안 B</th><th>시안 C</th></tr>
+      <tr><td>헤더 스타일</td><td>카드형 요약</td><td>풀스크린 히어로</td><td>컴팩트 인라인</td></tr>
+      <tr><td>정보 구조</td><td>그리드 카드</td><td>슬라이딩 패널 그리드</td><td>접기/펼치기 섹션</td></tr>
+      <tr><td>시각 임팩트</td><td>중간</td><td>높음</td><td>낮음 (기능 중심)</td></tr>
+      <tr><td>정보 접근성</td><td>즉시 확인</td><td>스크롤 필요</td><td>필요한 것만 펼침</td></tr>
+      <tr><td>적합 상황</td><td>균형잡힌 보기</td><td>비주얼 중시</td><td>정보 과다 시</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ========== SCREEN 3: SCR-INSP-CREATE ========== -->
+<div class="screen-section">
+  <h2>SCREEN 3: SCR-INSP-CREATE (임장 기록 작성)</h2>
+  <p class="screen-desc">방문 임장 기록을 작성하는 폼 화면 - 날짜, 시간대, 평점, 리뷰, 사진</p>
+  <div class="proposals">
+
+    <!-- Proposal A -->
+    <div class="proposal">
+      <div class="proposal-label">시안 A: 단일 스크롤 폼</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <span style="font-size:16px;">←</span>
+            <div class="app-bar-title">임장 기록 작성</div>
+            <span style="font-size:13px;color:var(--primary);font-weight:600;">저장</span>
+          </div>
+          <div style="padding:12px 14px;">
+            <!-- Date -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:6px;">방문일</div>
+              <div style="padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;display:flex;justify-content:space-between;">
+                <span>2024년 3월 15일</span><span style="color:var(--text-secondary);">📅</span>
+              </div>
+            </div>
+            <!-- Time Slots -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:6px;">시간대</div>
+              <div style="display:flex;gap:6px;">
+                <span class="chip active">오전</span>
+                <span class="chip">오후</span>
+                <span class="chip active">저녁</span>
+                <span class="chip">야간</span>
+              </div>
+            </div>
+            <!-- Overall Rating -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:6px;">종합 평점</div>
+              <div style="text-align:center;padding:8px;background:#fff;border-radius:8px;border:1px solid var(--border);">
+                <div style="font-size:24px;letter-spacing:2px;">★★★★☆</div>
+                <div style="font-size:18px;font-weight:700;color:var(--primary);margin-top:2px;">4.5</div>
+              </div>
+            </div>
+            <!-- Check Items -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:6px;">항목별 평점</div>
+              <div style="background:#fff;border-radius:8px;border:1px solid var(--border);overflow:hidden;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);">
+                  <span style="font-size:12px;">소음</span>
+                  <span style="font-size:12px;color:#F59E0B;">★★★★☆</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);">
+                  <span style="font-size:12px;">경사</span>
+                  <span style="font-size:12px;color:#F59E0B;">★★★☆☆</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);">
+                  <span style="font-size:12px;">상권</span>
+                  <span style="font-size:12px;color:#F59E0B;">★★★★★</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);">
+                  <span style="font-size:12px;">주차</span>
+                  <span style="font-size:12px;color:#F59E0B;">★★★★☆</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;">
+                  <span style="font-size:12px;">일조권</span>
+                  <span style="font-size:12px;color:#F59E0B;">★★★★★</span>
+                </div>
+              </div>
+            </div>
+            <!-- Text Areas -->
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:12px;font-weight:600;">장점</span>
+                <span style="font-size:10px;color:var(--text-secondary);">0/500</span>
+              </div>
+              <textarea class="input-field" rows="2" placeholder="단지의 장점을 입력하세요"></textarea>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:12px;font-weight:600;">단점</span>
+                <span style="font-size:10px;color:var(--text-secondary);">0/500</span>
+              </div>
+              <textarea class="input-field" rows="2" placeholder="단지의 단점을 입력하세요"></textarea>
+            </div>
+            <!-- Photos -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:6px;">사진</div>
+              <div style="display:flex;gap:6px;">
+                <div style="width:52px;height:52px;border:2px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:18px;">+</div>
+                <div style="width:52px;height:52px;background:#E2E8F0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">📷</div>
+                <div style="width:52px;height:52px;background:#E2E8F0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">📷</div>
+              </div>
+            </div>
+            <button class="btn-primary">저장하기</button>
+            <div style="height:20px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal B -->
+    <div class="proposal">
+      <div class="proposal-label">시안 B: 스텝 위저드</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <span style="font-size:16px;">←</span>
+            <div class="app-bar-title">임장 기록 작성</div>
+            <span style="font-size:11px;color:var(--text-secondary);">1/3</span>
+          </div>
+          <!-- Progress -->
+          <div style="padding:10px 14px 6px;">
+            <div style="display:flex;gap:4px;margin-bottom:4px;">
+              <div style="flex:1;height:3px;background:var(--primary);border-radius:2px;"></div>
+              <div style="flex:1;height:3px;background:var(--border);border-radius:2px;"></div>
+              <div style="flex:1;height:3px;background:var(--border);border-radius:2px;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-secondary);">
+              <span style="color:var(--primary);font-weight:600;">기본정보</span>
+              <span>텍스트리뷰</span>
+              <span>사진</span>
+            </div>
+          </div>
+          <div style="padding:12px 14px;">
+            <!-- Step 1 Content -->
+            <div style="font-size:16px;font-weight:700;margin-bottom:14px;">기본 정보 & 평점</div>
+            <!-- Date -->
+            <div style="margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:500;margin-bottom:6px;color:var(--text-secondary);">방문일</div>
+              <div style="padding:10px 14px;background:#fff;border:1px solid var(--border);border-radius:10px;font-size:14px;display:flex;justify-content:space-between;">
+                <span>2024년 3월 15일</span><span>📅</span>
+              </div>
+            </div>
+            <!-- Time -->
+            <div style="margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:500;margin-bottom:6px;color:var(--text-secondary);">시간대 (복수 선택)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <div style="padding:10px;border:2px solid var(--primary);background:#EEF2FF;border-radius:10px;text-align:center;font-size:13px;font-weight:500;color:var(--primary);">☀ 오전</div>
+                <div style="padding:10px;border:1px solid var(--border);border-radius:10px;text-align:center;font-size:13px;color:var(--text-secondary);">🌤 오후</div>
+                <div style="padding:10px;border:2px solid var(--primary);background:#EEF2FF;border-radius:10px;text-align:center;font-size:13px;font-weight:500;color:var(--primary);">🌆 저녁</div>
+                <div style="padding:10px;border:1px solid var(--border);border-radius:10px;text-align:center;font-size:13px;color:var(--text-secondary);">🌙 야간</div>
+              </div>
+            </div>
+            <!-- Overall Rating -->
+            <div style="margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:500;margin-bottom:6px;color:var(--text-secondary);">종합 평점</div>
+              <div style="text-align:center;padding:16px;background:#fff;border-radius:12px;border:1px solid var(--border);">
+                <div style="font-size:30px;letter-spacing:4px;">★★★★☆</div>
+                <div style="font-size:24px;font-weight:700;color:var(--primary);margin-top:4px;">4.5</div>
+              </div>
+            </div>
+            <!-- Item Ratings -->
+            <div style="margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:500;margin-bottom:6px;color:var(--text-secondary);">항목별 평점</div>
+              <div style="background:#fff;border-radius:10px;border:1px solid var(--border);padding:4px 0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;">
+                  <span style="font-size:13px;">🔊 소음</span>
+                  <span style="font-size:14px;color:#F59E0B;">★★★★☆</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;">
+                  <span style="font-size:13px;">⛰ 경사</span>
+                  <span style="font-size:14px;color:#F59E0B;">★★★☆☆</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;">
+                  <span style="font-size:13px;">🏪 상권</span>
+                  <span style="font-size:14px;color:#F59E0B;">★★★★★</span>
+                </div>
+              </div>
+            </div>
+            <!-- Next Button -->
+            <button class="btn-primary" style="margin-top:8px;">다음 단계 →</button>
+            <div style="height:16px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal C -->
+    <div class="proposal">
+      <div class="proposal-label">시안 C: 카드 섹션 + 접기/펼치기</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <span style="font-size:16px;">←</span>
+            <div class="app-bar-title">임장 기록 작성</div>
+            <span style="font-size:13px;color:var(--primary);font-weight:600;">저장</span>
+          </div>
+          <!-- Completion Status -->
+          <div style="padding:10px 14px 8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:600;">작성 진행률</span>
+              <span style="font-size:11px;color:var(--primary);font-weight:600;">2/4 완료</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:50%;"></div></div>
+          </div>
+          <!-- Section 1: Expanded -->
+          <div style="margin:4px 14px 6px;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+            <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;background:#F0FDF4;border-bottom:1px solid var(--border);">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span style="width:18px;height:18px;background:var(--secondary);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;">✓</span>
+                <span style="font-size:12px;font-weight:600;">기본 정보</span>
+              </div>
+              <span style="font-size:10px;">▲</span>
+            </div>
+            <div style="padding:10px 12px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                <div>
+                  <div style="font-size:10px;color:var(--text-secondary);">방문일</div>
+                  <div style="font-size:12px;font-weight:500;">2024.03.15</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text-secondary);">시간대</div>
+                  <div style="font-size:12px;font-weight:500;">오전, 저녁</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Section 2: Expanded -->
+          <div style="margin:0 14px 6px;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+            <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;background:#F0FDF4;border-bottom:1px solid var(--border);">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span style="width:18px;height:18px;background:var(--secondary);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;">✓</span>
+                <span style="font-size:12px;font-weight:600;">평점</span>
+              </div>
+              <span style="font-size:10px;">▲</span>
+            </div>
+            <div style="padding:10px 12px;">
+              <div style="text-align:center;margin-bottom:6px;">
+                <span style="font-size:18px;color:#F59E0B;">★★★★☆</span>
+                <span style="font-size:14px;font-weight:700;color:var(--primary);margin-left:4px;">4.5</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-secondary);">
+                <span>소음 4.0</span><span>경사 3.0</span><span>상권 5.0</span><span>주차 4.0</span><span>일조 5.0</span>
+              </div>
+            </div>
+          </div>
+          <!-- Section 3: Not complete -->
+          <div style="margin:0 14px 6px;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+            <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span style="width:18px;height:18px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-secondary);">3</span>
+                <span style="font-size:12px;font-weight:600;">리뷰</span>
+              </div>
+              <span style="font-size:10px;">▼</span>
+            </div>
+            <div style="padding:10px 12px;">
+              <div style="margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:11px;font-weight:500;">장점</span>
+                  <span style="font-size:10px;color:var(--text-secondary);">0/500</span>
+                </div>
+                <textarea class="input-field" rows="2" placeholder="장점을 입력하세요" style="font-size:11px;"></textarea>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:11px;font-weight:500;">단점</span>
+                  <span style="font-size:10px;color:var(--text-secondary);">0/500</span>
+                </div>
+                <textarea class="input-field" rows="2" placeholder="단점을 입력하세요" style="font-size:11px;"></textarea>
+              </div>
+            </div>
+          </div>
+          <!-- Section 4: Collapsed -->
+          <div style="margin:0 14px 6px;background:#fff;border-radius:10px;border:1px solid var(--border);">
+            <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span style="width:18px;height:18px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-secondary);">4</span>
+                <span style="font-size:12px;font-weight:600;">사진</span>
+                <span style="font-size:10px;color:var(--text-secondary);">0장</span>
+              </div>
+              <span style="font-size:10px;">▼</span>
+            </div>
+          </div>
+          <div style="padding:8px 14px;">
+            <button class="btn-primary">저장하기</button>
+          </div>
+          <div style="height:10px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <h3>SCR-INSP-CREATE 시안 비교</h3>
+    <table>
+      <tr><th>항목</th><th>시안 A</th><th>시안 B</th><th>시안 C</th></tr>
+      <tr><td>구조</td><td>단일 스크롤</td><td>3단계 위저드</td><td>접기/펼치기 카드</td></tr>
+      <tr><td>인지 부하</td><td>높음 (전체 노출)</td><td>낮음 (단계별)</td><td>중간 (선택 노출)</td></tr>
+      <tr><td>진행 상태</td><td>없음</td><td>진행바 + 단계</td><td>섹션별 완료 표시</td></tr>
+      <tr><td>편집 자유도</td><td>높음 (어디든 이동)</td><td>낮음 (순차적)</td><td>높음 (자유 선택)</td></tr>
+      <tr><td>적합 상황</td><td>숙련 사용자</td><td>초보 사용자</td><td>다양한 사용자</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ========== SCREEN 4: SCR-MAP ========== -->
+<div class="screen-section">
+  <h2>SCREEN 4: SCR-MAP (지도)</h2>
+  <p class="screen-desc">등록된 단지를 지도에서 확인하고 상태별 필터링하는 화면</p>
+  <div class="proposals">
+
+    <!-- Proposal A -->
+    <div class="proposal">
+      <div class="proposal-label">시안 A: 풀스크린 맵 + 오버레이 UI</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <!-- Full Map -->
+          <div class="map-placeholder" style="height:calc(100% - 56px);position:relative;">
+            <div class="map-grid"></div>
+            <!-- Roads -->
+            <div class="map-road" style="top:120px;left:0;right:0;height:8px;"></div>
+            <div class="map-road" style="top:0;bottom:0;left:100px;width:6px;"></div>
+            <div class="map-road" style="top:200px;left:40px;right:40px;height:4px;transform:rotate(15deg);"></div>
+            <!-- Search -->
+            <div class="search-float">
+              <div style="position:relative;">
+                <span style="position:absolute;left:10px;top:8px;font-size:14px;">🔍</span>
+                <input class="search-box" placeholder="단지 검색" style="font-family:inherit;">
+              </div>
+            </div>
+            <!-- Filter chips floating -->
+            <div style="position:absolute;top:46px;left:10px;right:10px;display:flex;gap:4px;z-index:5;">
+              <span class="chip active" style="background:var(--primary);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15);">전체</span>
+              <span class="chip" style="background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1);">관심</span>
+              <span class="chip" style="background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1);">예정</span>
+              <span class="chip" style="background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1);">완료</span>
+            </div>
+            <!-- Markers -->
+            <div class="map-marker" style="top:130px;left:80px;background:var(--visited);"></div>
+            <div class="map-marker" style="top:200px;left:160px;background:var(--planned);"></div>
+            <div class="map-marker" style="top:260px;left:60px;background:var(--interested);"></div>
+            <!-- Info Window -->
+            <div class="info-window" style="top:90px;left:55px;">
+              <div style="font-size:12px;font-weight:600;">래미안 블레스티지</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+                <span class="badge badge-visited" style="font-size:9px;">방문완료</span>
+                <span style="font-size:11px;color:#F59E0B;">★ 4.5</span>
+              </div>
+              <div style="font-size:10px;color:var(--text-secondary);margin-top:4px;">탭하여 상세보기 ›</div>
+            </div>
+            <!-- Current Location FAB -->
+            <div style="position:absolute;bottom:12px;right:12px;width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:5;font-size:14px;">📍</div>
+          </div>
+          <div class="bottom-tab">
+            <div class="tab-item"><span class="tab-icon">🏢</span>단지</div>
+            <div class="tab-item active"><span class="tab-icon">🗺</span>지도</div>
+            <div class="tab-item"><span class="tab-icon">⚙</span>설정</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal B -->
+    <div class="proposal">
+      <div class="proposal-label">시안 B: 분할 뷰 (맵 + 리스트)</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <!-- Top Map (60%) -->
+          <div class="map-placeholder" style="height:280px;position:relative;">
+            <div class="map-grid"></div>
+            <div class="map-road" style="top:100px;left:0;right:0;height:6px;"></div>
+            <div class="map-road" style="top:0;bottom:0;left:120px;width:5px;"></div>
+            <!-- Search -->
+            <div class="search-float">
+              <input class="search-box" placeholder="🔍 단지 검색" style="font-family:inherit;font-size:12px;">
+            </div>
+            <!-- Filters -->
+            <div style="position:absolute;top:42px;left:10px;display:flex;gap:3px;z-index:5;">
+              <span class="chip active" style="font-size:10px;padding:3px 8px;background:var(--primary);color:#fff;">전체</span>
+              <span class="chip" style="font-size:10px;padding:3px 8px;background:#fff;">관심</span>
+              <span class="chip" style="font-size:10px;padding:3px 8px;background:#fff;">완료</span>
+            </div>
+            <!-- Markers -->
+            <div class="map-marker" style="top:100px;left:70px;background:var(--visited);"></div>
+            <div class="map-marker" style="top:150px;left:150px;background:var(--planned);"></div>
+            <div class="map-marker" style="top:190px;left:90px;background:var(--interested);"></div>
+          </div>
+          <!-- Bottom List (40%) -->
+          <div style="background:#fff;border-radius:12px 12px 0 0;margin-top:-8px;position:relative;z-index:2;">
+            <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:6px auto;"></div>
+            <div style="font-size:12px;font-weight:600;padding:4px 14px 8px;">단지 목록 (3)</div>
+            <!-- List Items -->
+            <div style="padding:0 14px;">
+              <div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);background:#EEF2FF;margin:0 -14px;padding-left:14px;padding-right:14px;border-radius:4px;">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--visited);flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;">래미안 블레스티지</div>
+                  <div style="font-size:10px;color:var(--text-secondary);">서초구 반포동</div>
+                </div>
+                <div style="text-align:right;">
+                  <span class="badge badge-visited" style="font-size:9px;">완료</span>
+                  <div style="font-size:10px;color:#F59E0B;margin-top:2px;">★4.5</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--planned);flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;">자이 더 파크</div>
+                  <div style="font-size:10px;color:var(--text-secondary);">강남구 대치동</div>
+                </div>
+                <span class="badge badge-planned" style="font-size:9px;">예정</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;padding:8px 0;">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--interested);flex-shrink:0;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;">힐스테이트 리버시티</div>
+                  <div style="font-size:10px;color:var(--text-secondary);">성동구 성수동</div>
+                </div>
+                <span class="badge badge-interested" style="font-size:9px;">관심</span>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-tab">
+            <div class="tab-item"><span class="tab-icon">🏢</span>단지</div>
+            <div class="tab-item active"><span class="tab-icon">🗺</span>지도</div>
+            <div class="tab-item"><span class="tab-icon">⚙</span>설정</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal C -->
+    <div class="proposal">
+      <div class="proposal-label">시안 C: 맵 + 하단 시트</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <!-- Full Map -->
+          <div class="map-placeholder" style="height:calc(100% - 56px);position:relative;">
+            <div class="map-grid"></div>
+            <div class="map-road" style="top:90px;left:0;right:0;height:6px;"></div>
+            <div class="map-road" style="top:0;bottom:0;left:140px;width:5px;"></div>
+            <div class="map-road" style="top:160px;left:20px;width:200px;height:4px;transform:rotate(-10deg);"></div>
+            <!-- Search -->
+            <div class="search-float">
+              <input class="search-box" placeholder="🔍 단지명, 주소 검색" style="font-family:inherit;font-size:12px;">
+            </div>
+            <!-- Filters -->
+            <div style="position:absolute;top:44px;left:10px;display:flex;gap:4px;z-index:5;">
+              <span class="chip active" style="font-size:10px;padding:3px 8px;background:var(--primary);color:#fff;">전체</span>
+              <span class="chip" style="font-size:10px;padding:3px 8px;background:#fff;">관심</span>
+              <span class="chip" style="font-size:10px;padding:3px 8px;background:#fff;">예정</span>
+              <span class="chip" style="font-size:10px;padding:3px 8px;background:#fff;">완료</span>
+            </div>
+            <!-- Markers -->
+            <div class="map-marker" style="top:90px;left:90px;background:var(--visited);"></div>
+            <div class="map-marker" style="top:130px;left:180px;background:var(--planned);"></div>
+            <div class="map-marker" style="top:180px;left:50px;background:var(--interested);"></div>
+            <!-- Current Location -->
+            <div style="position:absolute;bottom:180px;right:12px;width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:5;font-size:14px;">📍</div>
+            <!-- Bottom Sheet (peek state) -->
+            <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -4px 16px rgba(0,0,0,.1);z-index:6;padding-bottom:56px;">
+              <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:8px auto;"></div>
+              <div style="padding:0 14px 4px;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:12px;font-weight:600;">주변 단지 3개</span>
+                <span style="font-size:10px;color:var(--primary);">전체보기 ▲</span>
+              </div>
+              <!-- Horizontal scroll cards -->
+              <div style="display:flex;gap:8px;padding:6px 14px 10px;overflow-x:auto;">
+                <div style="min-width:160px;background:var(--bg);border-radius:10px;padding:10px;border:2px solid var(--primary);">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:12px;font-weight:600;">래미안 블레스티지</span>
+                  </div>
+                  <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">서초구 반포동</div>
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                    <span class="badge badge-visited" style="font-size:9px;">완료</span>
+                    <span style="font-size:10px;color:#F59E0B;">★4.5</span>
+                  </div>
+                </div>
+                <div style="min-width:140px;background:var(--bg);border-radius:10px;padding:10px;">
+                  <div style="font-size:12px;font-weight:600;">자이 더 파크</div>
+                  <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">강남구 대치동</div>
+                  <div style="margin-top:6px;">
+                    <span class="badge badge-planned" style="font-size:9px;">예정</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-tab">
+            <div class="tab-item"><span class="tab-icon">🏢</span>단지</div>
+            <div class="tab-item active"><span class="tab-icon">🗺</span>지도</div>
+            <div class="tab-item"><span class="tab-icon">⚙</span>설정</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <h3>SCR-MAP 시안 비교</h3>
+    <table>
+      <tr><th>항목</th><th>시안 A</th><th>시안 B</th><th>시안 C</th></tr>
+      <tr><td>지도 영역</td><td>전체 화면</td><td>상단 60%</td><td>전체 + 하단시트</td></tr>
+      <tr><td>정보 표시</td><td>인포윈도우 팝업</td><td>하단 리스트 연동</td><td>하단 카드 슬라이드</td></tr>
+      <tr><td>맵-리스트 전환</td><td>탭으로 전환</td><td>동시 표시</td><td>시트 드래그</td></tr>
+      <tr><td>탐색 효율</td><td>지도 중심</td><td>균형 (맵+목록)</td><td>유연한 비율 조절</td></tr>
+      <tr><td>적합 상황</td><td>위치 중심 탐색</td><td>비교 필요 시</td><td>다양한 탐색 패턴</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ========== SCREEN 5: SCR-SHARE-SETTINGS ========== -->
+<div class="screen-section">
+  <h2>SCREEN 5: SCR-SHARE-SETTINGS (공유 설정)</h2>
+  <p class="screen-desc">단지 공유 링크 생성 및 참여자 역할을 관리하는 화면</p>
+  <div class="proposals">
+
+    <!-- Proposal A -->
+    <div class="proposal">
+      <div class="proposal-label">시안 A: 세로 리스트 + 액션 카드</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <span style="font-size:16px;">←</span>
+            <div class="app-bar-title">공유 설정</div>
+            <span></span>
+          </div>
+          <!-- Complex Name -->
+          <div style="padding:10px 14px;background:#EEF2FF;border-bottom:1px solid var(--border);">
+            <div style="font-size:14px;font-weight:600;">래미안 블레스티지</div>
+            <div style="font-size:11px;color:var(--text-secondary);">공유 및 권한 관리</div>
+          </div>
+          <!-- Link Generation Card -->
+          <div style="margin:10px 14px;background:#fff;border-radius:12px;padding:14px;border:1px solid var(--border);">
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px;">초대 링크 생성</div>
+            <div style="margin-bottom:10px;">
+              <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">권한 선택</div>
+              <div style="display:flex;gap:6px;">
+                <span style="flex:1;text-align:center;padding:8px;background:var(--primary);color:#fff;border-radius:8px;font-size:12px;font-weight:500;">Editor</span>
+                <span style="flex:1;text-align:center;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-secondary);">Viewer</span>
+              </div>
+            </div>
+            <button class="btn-primary" style="font-size:13px;padding:10px;">링크 생성</button>
+            <!-- Generated Link -->
+            <div style="margin-top:10px;background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">https://imjang.app/share/abc123...</span>
+              <span style="font-size:11px;color:var(--primary);font-weight:500;white-space:nowrap;">복사</span>
+              <span style="font-size:11px;color:var(--primary);font-weight:500;white-space:nowrap;">공유</span>
+            </div>
+            <div style="font-size:10px;color:var(--warning);margin-top:6px;display:flex;align-items:center;gap:4px;">
+              <span>⚠</span> 링크는 7일 후 만료됩니다
+            </div>
+          </div>
+          <!-- Members Section -->
+          <div style="padding:6px 14px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">참여자 (3명)</div>
+            <!-- Member 1 -->
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:10px;margin-bottom:6px;border:1px solid var(--border);">
+              <div class="avatar" style="background:var(--primary);">김</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:600;">김철수 <span style="font-size:10px;color:var(--primary);font-weight:400;">(나)</span></div>
+                <div style="font-size:10px;color:var(--text-secondary);">kim@email.com</div>
+              </div>
+              <span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:4px;font-weight:600;">Owner</span>
+            </div>
+            <!-- Member 2 -->
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:10px;margin-bottom:6px;border:1px solid var(--border);">
+              <div class="avatar" style="background:var(--secondary);">이</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:600;">이영희</div>
+                <div style="font-size:10px;color:var(--text-secondary);">lee@email.com</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <span style="font-size:10px;background:#DBEAFE;color:#1E40AF;padding:3px 8px;border-radius:4px;">Editor ▾</span>
+                <span style="font-size:12px;color:var(--error);">✕</span>
+              </div>
+            </div>
+            <!-- Member 3 -->
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:10px;margin-bottom:6px;border:1px solid var(--border);">
+              <div class="avatar" style="background:var(--warning);">박</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:600;">박지민</div>
+                <div style="font-size:10px;color:var(--text-secondary);">park@email.com</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <span style="font-size:10px;background:#F1F5F9;color:#475569;padding:3px 8px;border-radius:4px;">Viewer ▾</span>
+                <span style="font-size:12px;color:var(--error);">✕</span>
+              </div>
+            </div>
+          </div>
+          <div style="height:10px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal B -->
+    <div class="proposal">
+      <div class="proposal-label">시안 B: 탭 분리 (링크 / 참여자)</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <span style="font-size:16px;">←</span>
+            <div class="app-bar-title">래미안 블레스티지</div>
+            <span></span>
+          </div>
+          <!-- Segment Tabs -->
+          <div style="display:flex;margin:10px 14px;background:#EEF2FF;border-radius:8px;padding:2px;">
+            <div style="flex:1;text-align:center;padding:8px;background:var(--primary);color:#fff;border-radius:6px;font-size:12px;font-weight:600;">초대 링크</div>
+            <div style="flex:1;text-align:center;padding:8px;font-size:12px;color:var(--text-secondary);">참여자 관리</div>
+          </div>
+          <!-- Tab 1: Link Content -->
+          <div style="padding:0 14px;">
+            <div style="text-align:center;padding:24px 0 16px;">
+              <div style="width:56px;height:56px;background:#EEF2FF;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:24px;">🔗</div>
+              <div style="font-size:15px;font-weight:600;margin-top:10px;">초대 링크 생성</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">링크를 통해 다른 사람을 초대하세요</div>
+            </div>
+            <!-- Role Select -->
+            <div style="margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:500;margin-bottom:6px;">초대 권한</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;padding:14px;border:2px solid var(--primary);background:#EEF2FF;border-radius:12px;text-align:center;">
+                  <div style="font-size:16px;margin-bottom:4px;">✏</div>
+                  <div style="font-size:13px;font-weight:600;color:var(--primary);">Editor</div>
+                  <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">편집 가능</div>
+                </div>
+                <div style="flex:1;padding:14px;border:1px solid var(--border);border-radius:12px;text-align:center;">
+                  <div style="font-size:16px;margin-bottom:4px;">👁</div>
+                  <div style="font-size:13px;font-weight:500;color:var(--text-secondary);">Viewer</div>
+                  <div style="font-size:10px;color:var(--text-secondary);margin-top:2px;">읽기 전용</div>
+                </div>
+              </div>
+            </div>
+            <button class="btn-primary" style="font-size:14px;padding:12px;">링크 생성하기</button>
+            <!-- Generated Link -->
+            <div style="margin-top:14px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px;">
+              <div style="font-size:11px;font-weight:500;color:var(--secondary);margin-bottom:6px;">✓ 링크가 생성되었습니다</div>
+              <div style="background:#fff;border-radius:6px;padding:8px;font-size:10px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">https://imjang.app/share/abc123def456</div>
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <button class="btn-outline" style="flex:1;font-size:11px;padding:8px;">📋 복사</button>
+                <button class="btn-outline" style="flex:1;font-size:11px;padding:8px;">↗ 공유</button>
+              </div>
+              <div style="font-size:10px;color:var(--warning);margin-top:8px;text-align:center;">⚠ 링크는 7일 후 만료됩니다</div>
+            </div>
+          </div>
+          <div style="height:10px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal C -->
+    <div class="proposal">
+      <div class="proposal-label">시안 C: 통합 대시보드</div>
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="status-bar"><span class="time">9:41</span><span class="icons">●●● ■ 100%</span></div>
+        <div class="screen-content">
+          <div class="app-bar border-b">
+            <span style="font-size:16px;">←</span>
+            <div class="app-bar-title">공유 설정</div>
+            <span></span>
+          </div>
+          <div style="padding:10px 14px;">
+            <!-- Complex Header -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="width:40px;height:40px;background:linear-gradient(135deg,#DBEAFE,#93C5FD);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">🏢</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;">래미안 블레스티지</div>
+                <div style="font-size:11px;color:var(--text-secondary);">3명 참여 중</div>
+              </div>
+            </div>
+            <!-- Collapsible Link Section -->
+            <div style="background:#fff;border-radius:10px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden;">
+              <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;background:#FAFBFC;border-bottom:1px solid var(--border);">
+                <span style="font-size:12px;font-weight:600;">🔗 초대 링크</span>
+                <span style="font-size:10px;color:var(--text-secondary);">▲</span>
+              </div>
+              <div style="padding:10px 12px;">
+                <div style="display:flex;gap:6px;margin-bottom:8px;">
+                  <select style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;background:#fff;">
+                    <option>Editor</option>
+                    <option>Viewer</option>
+                  </select>
+                  <button style="padding:8px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-family:inherit;font-weight:500;">생성</button>
+                </div>
+                <div style="background:var(--bg);border-radius:6px;padding:6px 8px;display:flex;align-items:center;gap:4px;">
+                  <span style="font-size:10px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">https://imjang.app/share/abc123...</span>
+                  <span style="font-size:10px;color:var(--primary);font-weight:500;">복사</span>
+                </div>
+                <div style="font-size:10px;color:var(--warning);margin-top:4px;">⚠ 7일 후 만료</div>
+              </div>
+            </div>
+            <!-- Members Inline -->
+            <div style="font-size:12px;font-weight:600;margin-bottom:8px;">참여자</div>
+            <!-- Member rows with inline role editing -->
+            <div style="background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);">
+                <div class="avatar" style="background:var(--primary);width:28px;height:28px;font-size:11px;">김</div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:500;">김철수 <span style="font-size:9px;color:var(--primary);">(나)</span></div>
+                  <div style="font-size:9px;color:var(--text-secondary);">kim@email.com</div>
+                </div>
+                <span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 6px;border-radius:4px;font-weight:600;">Owner</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);">
+                <div class="avatar" style="background:var(--secondary);width:28px;height:28px;font-size:11px;">이</div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:500;">이영희</div>
+                  <div style="font-size:9px;color:var(--text-secondary);">lee@email.com</div>
+                </div>
+                <select style="font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;background:#DBEAFE;color:#1E40AF;font-family:inherit;">
+                  <option selected>Editor</option>
+                  <option>Viewer</option>
+                </select>
+                <span style="font-size:14px;color:var(--error);cursor:pointer;">✕</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;">
+                <div class="avatar" style="background:var(--warning);width:28px;height:28px;font-size:11px;">박</div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:500;">박지민</div>
+                  <div style="font-size:9px;color:var(--text-secondary);">park@email.com</div>
+                </div>
+                <select style="font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;background:#F1F5F9;color:#475569;font-family:inherit;">
+                  <option>Editor</option>
+                  <option selected>Viewer</option>
+                </select>
+                <span style="font-size:14px;color:var(--error);cursor:pointer;">✕</span>
+              </div>
+            </div>
+          </div>
+          <div style="height:10px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <h3>SCR-SHARE-SETTINGS 시안 비교</h3>
+    <table>
+      <tr><th>항목</th><th>시안 A</th><th>시안 B</th><th>시안 C</th></tr>
+      <tr><td>구조</td><td>세로 리스트</td><td>탭 분리</td><td>통합 대시보드</td></tr>
+      <tr><td>링크-멤버 관계</td><td>한 화면에 순차</td><td>탭으로 분리</td><td>접기/펼치기 통합</td></tr>
+      <tr><td>역할 변경</td><td>드롭다운 버튼</td><td>별도 탭에서</td><td>인라인 셀렉트</td></tr>
+      <tr><td>정보 밀도</td><td>중간</td><td>낮음 (탭 분리)</td><td>높음 (컴팩트)</td></tr>
+      <tr><td>적합 상황</td><td>범용</td><td>초대 중심 UX</td><td>관리 중심 UX</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center;padding:32px;background:#1E293B;color:#94A3B8;font-size:13px;">
+  <div style="font-weight:600;color:#fff;margin-bottom:4px;">임장노트 디자인 시안</div>
+  <div>5개 화면 × 3개 시안 = 총 15개 목업 | 2026.03.31</div>
+</div>
+
+</body>
+</html>
